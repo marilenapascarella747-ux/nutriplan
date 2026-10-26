@@ -1,5 +1,5 @@
 /* =========================================================
-   NUTRIPLAN ASL - LOGICA JAVASCRIPT DEFINITIVA
+   NUTRIPLAN ASL - LOGICA GENERAZIONE MENÙ VARIATA
    ========================================================= */
 
 let dataSelezionata = new Date().toISOString().split('T')[0];
@@ -248,7 +248,7 @@ function caricaFoglioASL(event) {
     }
 }
 
-/* GENERAZIONE PIANO ESATTAMENTE DAL CATALOGO UTENTE */
+/* GENERAZIONE PIANO VARIATO DAL CATALOGO */
 function generaSettimanaAuto() {
     const container = document.getElementById('lista-piano-settimana');
     container.innerHTML = '';
@@ -264,18 +264,30 @@ function generaSettimanaAuto() {
     giorni.forEach((g, idx) => {
         const isUni = giorniUni.includes(g);
         
+        // Rotazione intelligente tra i diversi cibi del catalogo
         let colazioneScelta = cibiColazione.length > 0 ? cibiColazione[idx % cibiColazione.length].cibo : 'Colazione';
         let pranzoScelto = '';
         
         if (isUni) {
-            let pranzoUni = cibiPranzo.find(c => c.cibo.toLowerCase().includes('uni') || c.cibo.toLowerCase().includes('panino') || c.cibo.toLowerCase().includes('bresaola'));
-            pranzoScelto = pranzoUni ? pranzoUni.cibo : (cibiPranzo[0]?.cibo || 'Pranzo Università');
+            let cibiUniList = cibiPranzo.filter(c => c.cibo.toLowerCase().includes('uni') || c.cibo.toLowerCase().includes('panino') || c.cibo.toLowerCase().includes('bresaola'));
+            if (cibiUniList.length > 0) {
+                pranzoScelto = cibiUniList[idx % cibiUniList.length].cibo;
+            } else {
+                pranzoScelto = cibiPranzo.length > 0 ? cibiPranzo[idx % cibiPranzo.length].cibo : 'Pranzo Università';
+            }
         } else {
-            let pranzoCasa = cibiPranzo.filter(c => !c.cibo.toLowerCase().includes('uni') && !c.cibo.toLowerCase().includes('panino'));
-            pranzoScelto = pranzoCasa.length > 0 ? pranzoCasa[idx % pranzoCasa.length].cibo : (cibiPranzo[0]?.cibo || 'Pranzo Casa');
+            let cibiCasaList = cibiPranzo.filter(c => !c.cibo.toLowerCase().includes('uni') && !c.cibo.toLowerCase().includes('panino') && !c.cibo.toLowerCase().includes('bresaola'));
+            if (cibiCasaList.length > 0) {
+                pranzoScelto = cibiCasaList[idx % cibiCasaList.length].cibo;
+            } else {
+                pranzoScelto = cibiPranzo.length > 0 ? cibiPranzo[idx % cibiPranzo.length].cibo : 'Pranzo Casa';
+            }
         }
 
         let cenaScelta = cibiCena.length > 0 ? cibiCena[idx % cibiCena.length].cibo : 'Cena';
+        if (cibiCena.length > 1) {
+            cenaScelta = cibiCena[idx % cibiCena.length].cibo; // Alterna le cene se ce ne sono di più nel catalogo
+        }
 
         container.innerHTML += `
             <div class="meal-row">
@@ -288,7 +300,7 @@ function generaSettimanaAuto() {
             </div>
         `;
     });
-    alert("Menù generato correttamente con i tuoi cibi personalizzati!");
+    alert("Menù generato variando correttamente i piatti dal tuo catalogo!");
 }
 
 function stampaMenuFamiglia() { window.print(); }
