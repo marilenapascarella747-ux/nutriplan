@@ -1,5 +1,5 @@
 /* =========================================================
-   NUTRIPLAN ASL - SCRIPT DEFINITIVO
+   NUTRIPLAN ASL - SCRIPT CORRETTO E FUNZIONANTE
    ========================================================= */
 
 let dataSelezionata = new Date().toISOString().split('T')[0];
@@ -355,7 +355,7 @@ function renderArchivio() {
     });
 }
 
-/* GENERAZIONE AUTOMATICA CON UNIVERSITÀ */
+/* GENERAZIONE AUTOMATICA CON UNIVERSITÀ (CORRETTA E ROBUSTA) */
 function generaSettimanaAuto() {
     const tbody = document.getElementById('lista-piano-settimana');
     if(!tbody) return;
@@ -410,25 +410,28 @@ function generaSettimanaAuto() {
 
     localStorage.setItem('nutri_menu_asl', JSON.stringify(window.menuAslSalvato));
     renderDiarioASL();
-    alert("Menù generato con i giorni Università e sincronizzato!");
+    alert("Menù generato con successo e sincronizzato con l'ASL!");
 }
 
 /* QUIZ MANUALE (CREA IL TUO MENÙ) */
 function avviaQuizMenu() {
     menuQuizTemporaneo = {};
     indiceQuizCorrente = 0;
-    document.getElementById('box-quiz-menu').style.display = 'block';
+    const box = document.getElementById('box-quiz-menu');
+    if(box) box.style.display = 'block';
     renderPassoQuiz();
 }
 
 function annullaQuizMenu() {
-    document.getElementById('box-quiz-menu').style.display = 'none';
+    const box = document.getElementById('box-quiz-menu');
+    if(box) box.style.display = 'none';
 }
 
 function renderPassoQuiz() {
     if (indiceQuizCorrente >= giorniQuizList.length) {
         componiTabellaDaQuiz();
-        document.getElementById('box-quiz-menu').style.display = 'none';
+        const box = document.getElementById('box-quiz-menu');
+        if(box) box.style.display = 'none';
         alert("Ottimo! Il tuo menù personalizzato tramite quiz è pronto.");
         return;
     }
