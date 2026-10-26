@@ -270,22 +270,34 @@ body {
     vertical-align: top;
 }
 
+/* =========================================================
+   REGOLE DI STAMPA CORRETTE (PER STAMPARE IL MENÙ E L'ASL)
+   ========================================================= */
 @media print {
     .bottom-nav, .app-header, .btn, button, input[type="file"], .modal {
         display: none !important;
     }
-    .app-container {
-        max-width: 100% !important;
+    body, .app-container, .main-content {
+        background: white !important;
+        height: auto !important;
+        overflow: visible !important;
         box-shadow: none !important;
-        padding-bottom: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
     }
     .page {
+        display: none !important;
+    }
+    .page.active {
         display: flex !important;
     }
     .card {
         border: none !important;
         box-shadow: none !important;
         padding: 0 !important;
-        margin-bottom: 20px !important;
+        margin-bottom: 15px !important;
+        width: 100% !important;
     }
 }
