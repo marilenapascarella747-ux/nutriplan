@@ -1,5 +1,5 @@
 /* =========================================================
-   NUTRIPLAN ASL - SCRIPT CON QUIZ MANUALE DAL CATALOGO
+   NUTRIPLAN ASL - SCRIPT DEFINITIVO E SINCRONIZZATO
    ========================================================= */
 
 let dataSelezionata = new Date().toISOString().split('T')[0];
@@ -13,6 +13,7 @@ let modalitaGiorno = 'Casa';
 let pastoInModifica = '';
 
 let registroGiornaliero = JSON.parse(localStorage.getItem('nutri_registro_giorni')) || {};
+let archivioSettimane = JSON.parse(localStorage.getItem('nutri_archivio')) || [];
 
 let catalogoNutrizionista = JSON.parse(localStorage.getItem('nutri_catalogo')) || [
     { cat: 'Colazione', cibo: 'Yogurt Greco 0% (150g) + Avena (30g) + Noci (10g)' },
@@ -35,6 +36,7 @@ function avviaApp() {
     caricaDataCorrente();
     renderCatalogo();
     renderDiarioASL();
+    renderArchivio();
     calcolaBMR();
 }
 
@@ -224,6 +226,7 @@ function eliminaCiboCatalogo(index) {
     }
 }
 
+/* DIARIO ASL SINCRONIZZATO CON I DATI REALI DELLA SETTIMANA */
 function renderDiarioASL() {
     const tbody = document.getElementById('asl-table-body');
     if(!tbody) return;
@@ -237,7 +240,7 @@ function renderDiarioASL() {
         d.setDate(d.getDate() + diff);
         let dataIso = d.toISOString().split('T')[0];
 
-        let pastiGiorno = registroGiornaliero[dataIso]?.pasti || {
+        let pastiGiorno = registroGiornaliero[dataIso]?.pasti || window.menuAslSalvato?.[g] || {
             'Colazione': catalogoNutrizionista.find(c => c.cat === 'Colazione')?.cibo || '-',
             'Spuntino M.': catalogoNutrizionista.find(c => c.cat === 'Spuntino')?.cibo || '-',
             'Pranzo': catalogoNutrizionista.find(c => c.cat === 'Pranzo')?.cibo || '-',
@@ -258,50 +261,109 @@ function renderDiarioASL() {
     });
 }
 
-/* GENERAZIONE AUTOMATICA */
+function caricaFoglioASL(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const imgData = e.target.result;
+            const imgElement = document.getElementById('asl-background-img');
+            if(imgElement) {
+                imgElement.src = imgData;
+                imgElement.style.display = 'block';
+            }
+            localStorage.setItem('nutri_foglio_asl_bg', imgData);
+            alert("Foglio caricato con successo!");
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+/* RITUALE DELLA DOMENICA & ARCHIVIO */
+function renderArchivio() {
+    const container = document.getElementById('lista-archivio-settimane');
+    if(!container) return;
+    container.innerHTML = '';
+
+    if (archivioSettimane.length === 0) {
+        container.innerHTML = '<p class="subtitle">Nessuna settimana salvata finora.</p>';
+        return;
+    }
+
+    archivioSettimane.forEach((sett) => {
+        container.innerHTML += `
+            <div class="meal-row">
+                <div>
+                    <strong>Domenica ${sett.data}:</strong> Settimana Archiviata
+                </div>
+            </div>
+        `;
+    });
+}
+
+function apriRitualeDomenica() {
+    const modalContent = document.getElementById('rituale-step-content');
+    if(!modalContent) return;
+    modalContent.innerHTML = `
+        <p class="subtitle"><strong>Fase 1: Controllo Pasti</strong></p>
+        <p style="font-size:0.85rem; margin-top:8px;">Hai registrato tutto per il foglio ASL di questa settimana?</p>
+        <div class="btn-row" style="margin-top:14px;">
+            <button class="btn btn-primary" onclick="concludiRitualeStep2()">Sì, Tutto Registrato</button>
+            <button class="btn btn-secondary" onclick="chiudiModale('modal-rituale')">Annulla</button>
+        </div>
+    `;
+    document.getElementById('modal-rituale').classList.add('active');
+}
+
+function concludiRitualeStep2() {
+    const dataStr = new Date().toLocaleDateString('it-IT');
+    archivioSettimane.unshift({ data: dataStr });
+    localStorage.setItem('nutri_archivio', JSON.stringify(archivioSettimane));
+    renderArchivio();
+
+    const modalContent = document.getElementById('rituale-step-content');
+    if(!modalContent) return;
+    modalContent.innerHTML = `
+        <p class="subtitle"><strong>Fase 2: Salvataggio completato!</strong></p>
+        <p style="font-size:0.85rem; margin-top:8px;">✅ Settimana archiviata con successo.</p>
+        <div class="btn-row" style="margin-top:14px;">
+            <button class="btn btn-primary" onclick="chiudiModale('modal-rituale'); cambiaScheda('page-asl', document.querySelectorAll('.nav-item')[3]);">📄 Vai al Foglio ASL per Stampare</button>
+        </div>
+    `;
+}
+
+/* GENERAZIONE AUTOMATICA E SINCRONIZZAZIONE ASL */
 function generaSettimanaAuto() {
     const tbody = document.getElementById('lista-piano-settimana');
     if(!tbody) return;
     tbody.innerHTML = '';
     const giorni = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'];
     
-    const chks = document.querySelectorAll('.chk-uni:checked');
-    const giorniUni = Array.from(chks).map(c => c.value);
-
     const cibiColazione = catalogoNutrizionista.filter(c => c.cat === 'Colazione');
     const cibiPranzo = catalogoNutrizionista.filter(c => c.cat === 'Pranzo');
     const cibiCena = catalogoNutrizionista.filter(c => c.cat === 'Cena');
     const cibiSpuntino = catalogoNutrizionista.filter(c => c.cat === 'Spuntino');
 
+    window.menuAslSalvato = {};
+
     giorni.forEach((g, idx) => {
-        const isUni = giorniUni.includes(g);
-        
         let colazioneScelta = cibiColazione.length > 0 ? cibiColazione[idx % cibiColazione.length].cibo : 'Colazione';
         let spuntinoScelto = cibiSpuntino.length > 0 ? cibiSpuntino[idx % cibiSpuntino.length].cibo : 'Spuntino';
         let merendaScelta = cibiSpuntino.length > 1 ? cibiSpuntino[(idx + 1) % cibiSpuntino.length].cibo : spuntinoScelto;
-        let pranzoScelto = '';
-        
-        if (isUni) {
-            let cibiUniList = cibiPranzo.filter(c => c.cibo.toLowerCase().includes('uni') || c.cibo.toLowerCase().includes('panino') || c.cibo.toLowerCase().includes('bresaola'));
-            if (cibiUniList.length > 0) {
-                pranzoScelto = cibiUniList[idx % cibiUniList.length].cibo;
-            } else {
-                pranzoScelto = cibiPranzo.length > 0 ? cibiPranzo[idx % cibiPranzo.length].cibo : 'Pranzo Università';
-            }
-        } else {
-            let cibiCasaList = cibiPranzo.filter(c => !c.cibo.toLowerCase().includes('uni') && !c.cibo.toLowerCase().includes('panino') && !c.cibo.toLowerCase().includes('bresaola'));
-            if (cibiCasaList.length > 0) {
-                pranzoScelto = cibiCasaList[idx % cibiCasaList.length].cibo;
-            } else {
-                pranzoScelto = cibiPranzo.length > 0 ? cibiPranzo[idx % cibiPranzo.length].cibo : 'Pranzo Casa';
-            }
-        }
-
+        let pranzoScelto = cibiPranzo.length > 0 ? cibiPranzo[idx % cibiPranzo.length].cibo : 'Pranzo';
         let cenaScelta = cibiCena.length > 0 ? cibiCena[idx % cibiCena.length].cibo : 'Cena';
+
+        window.menuAslSalvato[g] = {
+            'Colazione': colazioneScelta,
+            'Spuntino M.': spuntinoScelto,
+            'Pranzo': pranzoScelto,
+            'Merenda': merendaScelta,
+            'Cena': cenaScelta
+        };
 
         tbody.innerHTML += `
             <tr>
-                <td><strong>${g}</strong> ${isUni ? '🎓' : '🏠'}</td>
+                <td><strong>${g}</strong></td>
                 <td>${colazioneScelta}</td>
                 <td>${spuntinoScelto}</td>
                 <td>${pranzoScelto}</td>
@@ -310,29 +372,34 @@ function generaSettimanaAuto() {
             </tr>
         `;
     });
-    alert("Menù generato automaticamente!");
+
+    renderDiarioASL();
+    alert("Menù generato automaticamente e sincronizzato con l'ASL!");
 }
 
-/* QUIZ INTERATTIVO MANUALE (CREA IL TUO MENÙ) */
+/* QUIZ MANUALE (CREA IL TUO MENÙ) */
 function avviaQuizMenu() {
     menuQuizTemporaneo = {};
     indiceQuizCorrente = 0;
-    document.getElementById('modal-quiz-menu').classList.add('active');
+    document.getElementById('box-quiz-menu').style.display = 'block';
     renderPassoQuiz();
+}
+
+function annullaQuizMenu() {
+    document.getElementById('box-quiz-menu').style.display = 'none';
 }
 
 function renderPassoQuiz() {
     if (indiceQuizCorrente >= giorniQuizList.length) {
-        // Fine quiz: compila la tabella con le scelte dell'utente
         componiTabellaDaQuiz();
-        chiudiModale('modal-quiz-menu');
-        alert("Ottimo! Il tuo menù personalizzato tramite quiz è pronto.");
+        document.getElementById('box-quiz-menu').style.display = 'none';
+        alert("Ottimo! Il tuo menù personalizzato è pronto nella tabella e sincronizzato con l'ASL.");
         return;
     }
 
     let giorno = giorniQuizList[indiceQuizCorrente];
     document.getElementById('quiz-titolo-giorno').innerText = `Giorno: ${giorno} (${indiceQuizCorrente + 1}/7)`;
-    document.getElementById('quiz-istruzioni').innerText = `Scegli cosa mangiare per ogni pasto dal tuo catalogo:`;
+    document.getElementById('quiz-istruzioni').innerText = `Seleziona cosa vuoi mangiare per ${giorno}:`;
 
     let container = document.getElementById('quiz-campi-container');
     container.innerHTML = '';
@@ -343,28 +410,28 @@ function renderPassoQuiz() {
     let catCena = catalogoNutrizionista.filter(c => c.cat === 'Cena');
 
     container.innerHTML += `
-        <label><strong>Colazione:</strong>
-            <select id="quiz-colazione" class="form-control" style="margin-top:4px;">
+        <label>☕ <strong>Colazione:</strong>
+            <select id="quiz-colazione" class="form-control" style="margin-top:2px;">
                 ${catColazione.map(c => `<option value="${c.cibo}">${c.cibo}</option>`).join('')}
             </select>
         </label>
-        <label><strong>Spuntino Mattina:</strong>
-            <select id="quiz-spuntino" class="form-control" style="margin-top:4px;">
+        <label>🍏 <strong>Spuntino:</strong>
+            <select id="quiz-spuntino" class="form-control" style="margin-top:2px;">
                 ${catSpuntino.map(c => `<option value="${c.cibo}">${c.cibo}</option>`).join('')}
             </select>
         </label>
-        <label><strong>Pranzo:</strong>
-            <select id="quiz-pranzo" class="form-control" style="margin-top:4px;">
+        <label>🍝 <strong>Pranzo:</strong>
+            <select id="quiz-pranzo" class="form-control" style="margin-top:2px;">
                 ${catPranzo.map(c => `<option value="${c.cibo}">${c.cibo}</option>`).join('')}
             </select>
         </label>
-        <label><strong>Merenda:</strong>
-            <select id="quiz-merenda" class="form-control" style="margin-top:4px;">
+        <label>🥐 <strong>Merenda:</strong>
+            <select id="quiz-merenda" class="form-control" style="margin-top:2px;">
                 ${catSpuntino.map(c => `<option value="${c.cibo}">${c.cibo}</option>`).join('')}
             </select>
         </label>
-        <label><strong>Cena:</strong>
-            <select id="quiz-cena" class="form-control" style="margin-top:4px;">
+        <label>🐟 <strong>Cena:</strong>
+            <select id="quiz-cena" class="form-control" style="margin-top:2px;">
                 ${catCena.map(c => `<option value="${c.cibo}">${c.cibo}</option>`).join('')}
             </select>
         </label>
@@ -390,9 +457,19 @@ function componiTabellaDaQuiz() {
     if(!tbody) return;
     tbody.innerHTML = '';
 
+    window.menuAslSalvato = {};
+
     giorniQuizList.forEach(g => {
         let dati = menuQuizTemporaneo[g];
         if(!dati) return;
+
+        window.menuAslSalvato[g] = {
+            'Colazione': dati.colazione,
+            'Spuntino M.': dati.spuntino,
+            'Pranzo': dati.pranzo,
+            'Merenda': dati.merenda,
+            'Cena': dati.cena
+        };
 
         tbody.innerHTML += `
             <tr>
@@ -405,6 +482,8 @@ function componiTabellaDaQuiz() {
             </tr>
         `;
     });
+
+    renderDiarioASL();
 }
 
 function stampaMenuFamiglia() { 
