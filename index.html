@@ -12,7 +12,7 @@
         <!-- HEADER -->
         <header class="app-header">
             <h1>NutriPlan ASL 🌸💜</h1>
-            <p class="subtitle">Diario alimentare e pianificazione settimanale</p>
+            <p class="subtitle">Diario alimentare e pianificazione</p>
         </header>
 
         <!-- CONTENUTO DELLE SCHEDE -->
@@ -40,25 +40,25 @@
                 </div>
 
                 <div class="card">
-                    <h3>🥛 Tracciamento Acqua</h3>
+                    <h3>🥛 Acqua</h3>
                     <p id="water-text" style="font-size: 0.85rem; margin-bottom: 8px;">0 / 8 bicchieri</p>
                     <div class="water-grid" id="water-container"></div>
                     <div style="margin-top: 10px; display:flex; gap:8px;">
-                        <button class="btn btn-primary btn-sm" onclick="aggiungiBicchiereExtra()">+ 🥛 Aggiungi Bicchiere</button>
+                        <button class="btn btn-primary btn-sm" onclick="aggiungiBicchiereExtra()">+ Aggiungi</button>
                         <select id="water-goal-select" class="form-control" style="width: auto;" onchange="cambiaObiettivoAcqua(this.value)">
-                            <option value="6">Obiettivo: 6</option>
-                            <option value="8" selected>Obiettivo: 8</option>
-                            <option value="10">Obiettivo: 10</option>
+                            <option value="6">Ob. 6</option>
+                            <option value="8" selected>Ob. 8</option>
+                            <option value="10">Ob. 10</option>
                         </select>
                     </div>
                 </div>
             </section>
 
-            <!-- SCHEDA 2: PIANO SETTIMANALE E QUIZ -->
+            <!-- SCHEDA 2: PIANO & QUIZ UNIVERSITÀ -->
             <section id="page-piano" class="page">
                 <div class="card">
-                    <h2>📅 Quiz & Pianificazione Settimanale</h2>
-                    <p class="subtitle" style="margin-top: 5px;">Seleziona i giorni in cui sei all'Università (per adattare automaticamente il pranzo a sacco/panino):</p>
+                    <h2>📅 Piano & Quiz Università</h2>
+                    <p class="subtitle" style="margin-top: 5px;">Seleziona i giorni in cui sei all'Università:</p>
                     
                     <div style="display: flex; flex-direction: column; gap: 6px; margin: 12px 0; font-size: 0.9rem;">
                         <label><input type="checkbox" class="chk-uni" value="Lunedì"> Lunedì in Università</label>
@@ -71,13 +71,13 @@
                     </div>
 
                     <div class="btn-row">
-                        <button class="btn btn-primary" onclick="generaSettimanaAuto()">✨ Genera Menù Personalizzato</button>
-                        <button class="btn btn-secondary" onclick="stampaMenuFamiglia()">🖨️ Stampa Menù Famiglia</button>
+                        <button class="btn btn-primary" onclick="generaSettimanaAuto()">✨ Genera Menù</button>
+                        <button class="btn btn-secondary" onclick="stampaMenuFamiglia()">🖨️ Stampa Menù</button>
                     </div>
                 </div>
 
                 <div class="card">
-                    <h3>📋 Anteprima Piano Generato</h3>
+                    <h3>📋 Anteprima Piano</h3>
                     <div id="lista-piano-settimana" style="margin-top: 10px;">
                         <p class="subtitle">Genera il menù per visualizzarlo qui.</p>
                     </div>
@@ -87,8 +87,8 @@
             <!-- SCHEDA 3: DIETA / CATALOGO -->
             <section id="page-dieta" class="page">
                 <div class="card">
-                    <h2>🥗 Catalogo Nutrizionista</h2>
-                    <p class="subtitle" style="margin-top: 5px;">I tuoi cibi inseriti verranno usati per popolare automaticamente le giornate e il menù.</p>
+                    <h2>🥗 Catalogo Cibi</h2>
+                    <p class="subtitle" style="margin-top: 5px;">I tuoi alimenti inseriti per popolare i pasti.</p>
                     <button class="btn btn-primary" style="margin-top: 12px;" onclick="apriModalNuovoCibo()">+ Aggiungi Alimento</button>
                 </div>
                 <div class="card">
@@ -101,20 +101,20 @@
             <section id="page-asl" class="page">
                 <div class="card">
                     <h2>📄 Foglio ASL</h2>
-                    <p class="subtitle" style="margin-top: 5px;">Carica il modello del tuo foglio ASL in PDF o Immagine come sfondo:</p>
+                    <p class="subtitle" style="margin-top: 5px;">Carica il modello del tuo foglio:</p>
                     <input type="file" accept="image/*,application/pdf" class="form-control" style="margin-top: 10px;" onchange="caricaFoglioASL(event)">
                 </div>
                 
                 <div class="card asl-preview-card">
-                    <h3>Visualizzazione Diario ASL</h3>
+                    <h3>Diario ASL</h3>
                     <div class="asl-container" style="position: relative; margin-top: 10px; overflow-x: auto;">
                         <img id="asl-background-img" style="display:none; width: 100%; border-radius: 8px;" alt="Sfondo ASL">
-                        <table class="asl-table" style="width: 100%; font-size: 0.8rem; margin-top: 10px;">
+                        <table class="asl-table" style="width: 100%; font-size: 0.75rem; margin-top: 10px;">
                             <thead>
                                 <tr style="background: #fdf2f8; color: #db2777;">
                                     <th>Giorno</th>
                                     <th>Colazione</th>
-                                    <th>Spuntino M.</th>
+                                    <th>Spuntino</th>
                                     <th>Pranzo</th>
                                     <th>Merenda</th>
                                     <th>Cena</th>
@@ -127,7 +127,7 @@
                 </div>
             </section>
 
-            <!-- SCHEDA 5: PROFILO & RITUALE -->
+            <!-- SCHEDA 5: PROFILO -->
             <section id="page-profilo" class="page">
                 <div class="card">
                     <h2>⚙️ Profilo & BMR</h2>
@@ -135,20 +135,8 @@
                         <input type="number" id="input-peso" class="form-control" placeholder="Peso (kg)" oninput="calcolaBMR()">
                         <input type="number" id="input-altezza" class="form-control" placeholder="Altezza (cm)" oninput="calcolaBMR()">
                         <input type="number" id="input-eta" class="form-control" placeholder="Età" oninput="calcolaBMR()">
-                        <input type="email" id="input-email" class="form-control" placeholder="Tua email per promemoria" onchange="salvaProfilo()">
                     </div>
                     <p style="margin-top: 10px; font-size: 0.85rem;">BMR Calcolato: <strong id="bmr-output">--</strong> kcal</p>
-                </div>
-
-                <div class="card">
-                    <h2>🌸 Rituale della Domenica</h2>
-                    <p class="subtitle" style="margin-top: 5px;">Archivia la settimana e prepara la programmazione successiva.</p>
-                    <button class="btn btn-primary" style="margin-top: 10px;" onclick="apriRitualeDomenica()">Avvia Rituale</button>
-                </div>
-
-                <div class="card">
-                    <h2>📂 Archivio Settimanale</h2>
-                    <div id="lista-archivio-settimane" style="margin-top: 10px;"></div>
                 </div>
             </section>
 
@@ -180,13 +168,6 @@
                     <button class="btn btn-primary" onclick="salvaNuovoCiboCatalogo()">Aggiungi</button>
                     <button class="btn btn-secondary" onclick="chiudiModale('modal-nuovo-cibo')">Annulla</button>
                 </div>
-            </div>
-        </div>
-
-        <div id="modal-rituale" class="modal">
-            <div class="modal-content">
-                <h3>Rituale della Domenica</h3>
-                <div id="rituale-step-content" style="margin-top: 10px;"></div>
             </div>
         </div>
 
