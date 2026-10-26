@@ -1,5 +1,5 @@
 /* =========================================================
-   NUTRIPLAN ASL - SCRIPT DEFINITIVO TABELLA CORRETTA
+   NUTRIPLAN ASL - SCRIPT CON QUIZ MANUALE DAL CATALOGO
    ========================================================= */
 
 let dataSelezionata = new Date().toISOString().split('T')[0];
@@ -18,11 +18,15 @@ let catalogoNutrizionista = JSON.parse(localStorage.getItem('nutri_catalogo')) |
     { cat: 'Colazione', cibo: 'Yogurt Greco 0% (150g) + Avena (30g) + Noci (10g)' },
     { cat: 'Colazione', cibo: 'Latte P.S. (200ml) + 3 Fette biscottate integrali' },
     { cat: 'Pranzo', cibo: 'Riso integrale (70g) + Pollo (120g) + Zucchine' },
-    { cat: 'Pranzo', cibo: 'Panino integrale (80g) con Bresaola (60g) (Pranzo Uni)' },
+    { cat: 'Pranzo', cibo: 'Panino integrale (80g) + Bresaola (60g)' },
     { cat: 'Cena', cibo: 'Orata al forno (180g) + Insalata mista + Pane (40g)' },
     { cat: 'Cena', cibo: 'Petto di Tacchino ai ferri (150g) + Finocchi' },
     { cat: 'Spuntino', cibo: 'Mela (150g) + Mandorle (15g)' }
 ];
+
+let menuQuizTemporaneo = {};
+let giorniQuizList = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'];
+let indiceQuizCorrente = 0;
 
 function avviaApp() {
     if(document.getElementById('water-goal-select')) {
@@ -254,6 +258,7 @@ function renderDiarioASL() {
     });
 }
 
+/* GENERAZIONE AUTOMATICA */
 function generaSettimanaAuto() {
     const tbody = document.getElementById('lista-piano-settimana');
     if(!tbody) return;
@@ -305,7 +310,101 @@ function generaSettimanaAuto() {
             </tr>
         `;
     });
-    alert("Tabella menù generata correttamente!");
+    alert("Menù generato automaticamente!");
+}
+
+/* QUIZ INTERATTIVO MANUALE (CREA IL TUO MENÙ) */
+function avviaQuizMenu() {
+    menuQuizTemporaneo = {};
+    indiceQuizCorrente = 0;
+    document.getElementById('modal-quiz-menu').classList.add('active');
+    renderPassoQuiz();
+}
+
+function renderPassoQuiz() {
+    if (indiceQuizCorrente >= giorniQuizList.length) {
+        // Fine quiz: compila la tabella con le scelte dell'utente
+        componiTabellaDaQuiz();
+        chiudiModale('modal-quiz-menu');
+        alert("Ottimo! Il tuo menù personalizzato tramite quiz è pronto.");
+        return;
+    }
+
+    let giorno = giorniQuizList[indiceQuizCorrente];
+    document.getElementById('quiz-titolo-giorno').innerText = `Giorno: ${giorno} (${indiceQuizCorrente + 1}/7)`;
+    document.getElementById('quiz-istruzioni').innerText = `Scegli cosa mangiare per ogni pasto dal tuo catalogo:`;
+
+    let container = document.getElementById('quiz-campi-container');
+    container.innerHTML = '';
+
+    let catColazione = catalogoNutrizionista.filter(c => c.cat === 'Colazione');
+    let catSpuntino = catalogoNutrizionista.filter(c => c.cat === 'Spuntino');
+    let catPranzo = catalogoNutrizionista.filter(c => c.cat === 'Pranzo');
+    let catCena = catalogoNutrizionista.filter(c => c.cat === 'Cena');
+
+    container.innerHTML += `
+        <label><strong>Colazione:</strong>
+            <select id="quiz-colazione" class="form-control" style="margin-top:4px;">
+                ${catColazione.map(c => `<option value="${c.cibo}">${c.cibo}</option>`).join('')}
+            </select>
+        </label>
+        <label><strong>Spuntino Mattina:</strong>
+            <select id="quiz-spuntino" class="form-control" style="margin-top:4px;">
+                ${catSpuntino.map(c => `<option value="${c.cibo}">${c.cibo}</option>`).join('')}
+            </select>
+        </label>
+        <label><strong>Pranzo:</strong>
+            <select id="quiz-pranzo" class="form-control" style="margin-top:4px;">
+                ${catPranzo.map(c => `<option value="${c.cibo}">${c.cibo}</option>`).join('')}
+            </select>
+        </label>
+        <label><strong>Merenda:</strong>
+            <select id="quiz-merenda" class="form-control" style="margin-top:4px;">
+                ${catSpuntino.map(c => `<option value="${c.cibo}">${c.cibo}</option>`).join('')}
+            </select>
+        </label>
+        <label><strong>Cena:</strong>
+            <select id="quiz-cena" class="form-control" style="margin-top:4px;">
+                ${catCena.map(c => `<option value="${c.cibo}">${c.cibo}</option>`).join('')}
+            </select>
+        </label>
+    `;
+}
+
+function proseguiQuizMenu() {
+    let giorno = giorniQuizList[indiceQuizCorrente];
+    menuQuizTemporaneo[giorno] = {
+        colazione: document.getElementById('quiz-colazione')?.value || '-',
+        spuntino: document.getElementById('quiz-spuntino')?.value || '-',
+        pranzo: document.getElementById('quiz-pranzo')?.value || '-',
+        merenda: document.getElementById('quiz-merenda')?.value || '-',
+        cena: document.getElementById('quiz-cena')?.value || '-'
+    };
+
+    indiceQuizCorrente++;
+    renderPassoQuiz();
+}
+
+function componiTabellaDaQuiz() {
+    const tbody = document.getElementById('lista-piano-settimana');
+    if(!tbody) return;
+    tbody.innerHTML = '';
+
+    giorniQuizList.forEach(g => {
+        let dati = menuQuizTemporaneo[g];
+        if(!dati) return;
+
+        tbody.innerHTML += `
+            <tr>
+                <td><strong>${g}</strong></td>
+                <td>${dati.colazione}</td>
+                <td>${dati.spuntino}</td>
+                <td>${dati.pranzo}</td>
+                <td>${dati.merenda}</td>
+                <td>${dati.cena}</td>
+            </tr>
+        `;
+    });
 }
 
 function stampaMenuFamiglia() { 
