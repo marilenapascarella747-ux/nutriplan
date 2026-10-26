@@ -2,261 +2,202 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NutriPlan ASL</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div class="app-shell">
-        <!-- HEADER APP CON CAMBIO DATA -->
+    <div class="app-container">
+        <!-- HEADER -->
         <header class="app-header">
-            <div class="logo">🥗 NutriPlan ASL</div>
-            <div class="date-picker-wrapper">
-                <input type="date" id="select-date-picker" onchange="cambiaDataSelezionata(this.value)">
-            </div>
+            <h1>NutriPlan ASL 🌸💜</h1>
+            <p class="subtitle">Diario alimentare e pianificazione settimanale</p>
         </header>
 
-        <!-- SCHEDA 1: OGGI / GIORNO SELEZIONATO -->
-        <main id="page-oggi" class="page active">
-            <!-- SWITCH CASA / UNI -->
-            <div class="switch-container">
-                <button id="btn-mode-casa" class="switch-btn active" onclick="setModalitaGiorno('Casa')">🏠 Oggi a Casa</button>
-                <button id="btn-mode-uni" class="switch-btn" onclick="setModalitaGiorno('Uni')">🎓 In Università</button>
-            </div>
+        <!-- CONTENUTO DELLE SCHEDE -->
+        <main class="main-content">
 
-            <!-- CARD IDRATAZIONE PERSONALIZZABILE -->
-            <div class="card card-water">
-                <div class="water-header">
-                    <div>
-                        <span class="water-title">💧 Idratazione del Giorno</span>
-                        <div class="water-sub">Obiettivo: 
-                            <select id="water-goal-select" onchange="cambiaObiettivoAcqua(this.value)">
-                                <option value="6">6 Bicchieri (1.5L)</option>
-                                <option value="8" selected>8 Bicchieri (2.0L)</option>
-                                <option value="10">10 Bicchieri (2.5L)</option>
-                                <option value="12">12 Bicchieri (3.0L)</option>
-                            </select>
-                        </div>
+            <!-- SCHEDA 1: OGGI -->
+            <section id="page-oggi" class="page active">
+                <div class="card">
+                    <h2>📅 Gestione Giornaliera</h2>
+                    <div style="margin: 10px 0;">
+                        <label for="select-date-picker" style="font-size: 0.85rem; font-weight: 500;">Seleziona Data:</label>
+                        <input type="date" id="select-date-picker" class="form-control" onchange="cambiaDataSelezionata(this.value)" style="margin-top: 4px;">
                     </div>
-                    <span class="water-count" id="water-text">0 / 8 bicchieri</span>
+                    <h3 id="display-giorno-nome" style="font-size: 1rem; color: #7c3aed; margin-top: 10px;">Oggi</h3>
+                    
+                    <div class="btn-row" style="margin-top: 10px;">
+                        <button id="btn-mode-casa" class="btn btn-secondary active" onclick="setModalitaGiorno('Casa')">🏠 Casa</button>
+                        <button id="btn-mode-uni" class="btn btn-secondary" onclick="setModalitaGiorno('Uni')">🎓 Università</button>
+                    </div>
                 </div>
-                <div class="water-glasses-wrapper">
-                    <div class="water-glasses" id="water-container"></div>
-                    <button class="btn btn-sm btn-water-add" onclick="aggiungiBicchiereExtra()">➕ 1 Extra</button>
-                </div>
-            </div>
 
-            <!-- CARD PASTI REGISTRATI -->
-            <div class="card">
-                <div class="card-header">
-                    <h3>🍽️ Pasti del <span id="display-giorno-nome">Giorno</span></h3>
-                    <button class="btn btn-accent btn-sm" onclick="apriRitualeDomenica()">🌙 Rituale Domenica</button>
+                <div class="card">
+                    <h3>🍽️ Pasti di Oggi</h3>
+                    <div id="lista-pasti-oggi" style="margin-top: 10px;"></div>
                 </div>
-                <div id="lista-pasti-oggi" class="pasti-list"></div>
-            </div>
-        </main>
 
-        <!-- SCHEDA 2: PIANO SETTIMANALE -->
-        <main id="page-piano" class="page">
-            <div class="card">
-                <h3>📅 Pianificatore Prossima Settimana</h3>
-                <p class="subtitle">Seleziona i giorni in cui andrai all'università e genera il menù.</p>
+                <div class="card">
+                    <h3>🥛 Tracciamento Acqua</h3>
+                    <p id="water-text" style="font-size: 0.85rem; margin-bottom: 8px;">0 / 8 bicchieri</p>
+                    <div class="water-grid" id="water-container"></div>
+                    <div style="margin-top: 10px; display:flex; gap:8px;">
+                        <button class="btn btn-primary btn-sm" onclick="aggiungiBicchiereExtra()">+ 🥛 Aggiungi Bicchiere</button>
+                        <select id="water-goal-select" class="form-control" style="width: auto;" onchange="cambiaObiettivoAcqua(this.value)">
+                            <option value="6">Obiettivo: 6</option>
+                            <option value="8" selected>Obiettivo: 8</option>
+                            <option value="10">Obiettivo: 10</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SCHEDA 2: PIANO SETTIMANALE E QUIZ -->
+            <section id="page-piano" class="page">
+                <div class="card">
+                    <h2>📅 Quiz & Pianificazione Settimanale</h2>
+                    <p class="subtitle" style="margin-top: 5px;">Seleziona i giorni in cui sei all'Università (per adattare automaticamente il pranzo a sacco/panino):</p>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 6px; margin: 12px 0; font-size: 0.9rem;">
+                        <label><input type="checkbox" class="chk-uni" value="Lunedì"> Lunedì in Università</label>
+                        <label><input type="checkbox" class="chk-uni" value="Martedì"> Martedì in Università</label>
+                        <label><input type="checkbox" class="chk-uni" value="Mercoledì"> Mercoledì in Università</label>
+                        <label><input type="checkbox" class="chk-uni" value="Giovedì"> Giovedì in Università</label>
+                        <label><input type="checkbox" class="chk-uni" value="Venerdì"> Venerdì in Università</label>
+                        <label><input type="checkbox" class="chk-uni" value="Sabato"> Sabato in Università</label>
+                        <label><input type="checkbox" class="chk-uni" value="Domenica"> Domenica in Università</label>
+                    </div>
+
+                    <div class="btn-row">
+                        <button class="btn btn-primary" onclick="generaSettimanaAuto()">✨ Genera Menù Personalizzato</button>
+                        <button class="btn btn-secondary" onclick="stampaMenuFamiglia()">🖨️ Stampa Menù Famiglia</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>📋 Anteprima Piano Generato</h3>
+                    <div id="lista-piano-settimana" style="margin-top: 10px;">
+                        <p class="subtitle">Genera il menù per visualizzarlo qui.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SCHEDA 3: DIETA / CATALOGO -->
+            <section id="page-dieta" class="page">
+                <div class="card">
+                    <h2>🥗 Catalogo Nutrizionista</h2>
+                    <p class="subtitle" style="margin-top: 5px;">I tuoi cibi inseriti verranno usati per popolare automaticamente le giornate e il menù.</p>
+                    <button class="btn btn-primary" style="margin-top: 12px;" onclick="apriModalNuovoCibo()">+ Aggiungi Alimento</button>
+                </div>
+                <div class="card">
+                    <h3>Alimenti Disponibili</h3>
+                    <div id="lista-catalogo-cibi" style="margin-top: 10px;"></div>
+                </div>
+            </section>
+
+            <!-- SCHEDA 4: ASL -->
+            <section id="page-asl" class="page">
+                <div class="card">
+                    <h2>📄 Foglio ASL</h2>
+                    <p class="subtitle" style="margin-top: 5px;">Carica il modello del tuo foglio ASL in PDF o Immagine come sfondo:</p>
+                    <input type="file" accept="image/*,application/pdf" class="form-control" style="margin-top: 10px;" onchange="caricaFoglioASL(event)">
+                </div>
                 
-                <div class="uni-days-selector">
-                    <label><strong>Giorni in Università (Pranzo al Sacco):</strong></label>
-                    <div class="checkbox-grid">
-                        <label><input type="checkbox" class="chk-uni" value="Lunedì"> Lun</label>
-                        <label><input type="checkbox" class="chk-uni" value="Martedì"> Mar</label>
-                        <label><input type="checkbox" class="chk-uni" value="Mercoledì"> Mer</label>
-                        <label><input type="checkbox" class="chk-uni" value="Giovedì"> Gio</label>
-                        <label><input type="checkbox" class="chk-uni" value="Venerdì"> Ven</label>
+                <div class="card asl-preview-card">
+                    <h3>Visualizzazione Diario ASL</h3>
+                    <div class="asl-container" style="position: relative; margin-top: 10px; overflow-x: auto;">
+                        <img id="asl-background-img" style="display:none; width: 100%; border-radius: 8px;" alt="Sfondo ASL">
+                        <table class="asl-table" style="width: 100%; font-size: 0.8rem; margin-top: 10px;">
+                            <thead>
+                                <tr style="background: #fdf2f8; color: #db2777;">
+                                    <th>Giorno</th>
+                                    <th>Colazione</th>
+                                    <th>Spuntino M.</th>
+                                    <th>Pranzo</th>
+                                    <th>Merenda</th>
+                                    <th>Cena</th>
+                                </tr>
+                            </thead>
+                            <tbody id="asl-table-body"></tbody>
+                        </table>
                     </div>
+                    <button class="btn btn-primary" style="margin-top: 15px;" onclick="window.print()">Stampa Foglio ASL</button>
+                </div>
+            </section>
+
+            <!-- SCHEDA 5: PROFILO & RITUALE -->
+            <section id="page-profilo" class="page">
+                <div class="card">
+                    <h2>⚙️ Profilo & BMR</h2>
+                    <div style="display:flex; flex-direction:column; gap:8px; margin-top:10px;">
+                        <input type="number" id="input-peso" class="form-control" placeholder="Peso (kg)" oninput="calcolaBMR()">
+                        <input type="number" id="input-altezza" class="form-control" placeholder="Altezza (cm)" oninput="calcolaBMR()">
+                        <input type="number" id="input-eta" class="form-control" placeholder="Età" oninput="calcolaBMR()">
+                        <input type="email" id="input-email" class="form-control" placeholder="Tua email per promemoria" onchange="salvaProfilo()">
+                    </div>
+                    <p style="margin-top: 10px; font-size: 0.85rem;">BMR Calcolato: <strong id="bmr-output">--</strong> kcal</p>
                 </div>
 
-                <div class="btn-row" style="margin-top:14px;">
-                    <button class="btn btn-primary" onclick="generaSettimanaAuto()">🎲 Genera 1-Click</button>
-                    <button class="btn btn-secondary" onclick="stampaMenuFamiglia()">🖨️ Menù Famiglia</button>
+                <div class="card">
+                    <h2>🌸 Rituale della Domenica</h2>
+                    <p class="subtitle" style="margin-top: 5px;">Archivia la settimana e prepara la programmazione successiva.</p>
+                    <button class="btn btn-primary" style="margin-top: 10px;" onclick="apriRitualeDomenica()">Avvia Rituale</button>
                 </div>
-            </div>
 
-            <div class="card">
-                <h3>🗓️ Menù Settimanale</h3>
-                <div id="lista-piano-settimana"></div>
-            </div>
+                <div class="card">
+                    <h2>📂 Archivio Settimanale</h2>
+                    <div id="lista-archivio-settimane" style="margin-top: 10px;"></div>
+                </div>
+            </section>
+
         </main>
-
-        <!-- SCHEDA 3: CATALOGO DIETA NUTRIZIONISTA -->
-        <main id="page-catalogo" class="page">
-            <div class="card">
-                <div class="card-header">
-                    <h3>🥗 Catalogo Nutrizionista</h3>
-                    <button class="btn btn-primary btn-sm" onclick="apriModalNuovoCibo()">➕ Aggiungi Cibo</button>
-                </div>
-                <p class="subtitle">Modifica o aggiungi gli alimenti consentiti dalla tua nutrizionista.</p>
-                <div id="lista-catalogo-cibi"></div>
-            </div>
-        </main>
-
-        <!-- SCHEDA 4: DIARIO ASL -->
-        <main id="page-asl" class="page">
-            <div class="card no-print">
-                <div class="card-header">
-                    <h3>📋 Diario Alimentare ASL</h3>
-                    <button class="btn btn-secondary btn-sm" onclick="window.print()">🖨️ Stampa PDF A4</button>
-                </div>
-                <div class="asl-upload">
-                    <label>📂 Carica foto/PDF del tuo foglio ASL ufficiale:</label>
-                    <input type="file" id="asl-file-input" accept="image/*,application/pdf" onchange="caricaFoglioASL(event)">
-                </div>
-            </div>
-            
-            <div class="card asl-paper">
-                <h3 class="asl-title">DIARIO ALIMENTARE SETTIMANALE - ASL</h3>
-                <img id="asl-background-img" class="asl-bg" style="display:none;" alt="Foglio ASL Ufficiale">
-                <table class="asl-table">
-                    <thead>
-                        <tr>
-                            <th>Giorno</th>
-                            <th>Colazione</th>
-                            <th>Spuntino M.</th>
-                            <th>Pranzo</th>
-                            <th>Merenda</th>
-                            <th>Cena</th>
-                        </tr>
-                    </thead>
-                    <tbody id="asl-table-body"></tbody>
-                </table>
-            </div>
-        </main>
-
-        <!-- SCHEDA 5: PROFILO & NOTIFICHE -->
-        <main id="page-profilo" class="page">
-            <div class="card">
-                <h3>🔔 Orari Notifiche & Promemoria</h3>
-                <p class="subtitle">Attiva le notifiche per ricordarti di mangiare e bere.</p>
-                
-                <div class="form-row" style="margin-top:10px;">
-                    <div class="form-group">
-                        <label>Ora Colazione:</label>
-                        <input type="time" id="time-colazione" class="form-control" value="08:00" onchange="salvaOrariNotifiche()">
-                    </div>
-                    <div class="form-group">
-                        <label>Ora Pranzo:</label>
-                        <input type="time" id="time-pranzo" class="form-control" value="13:00" onchange="salvaOrariNotifiche()">
-                    </div>
-                    <div class="form-group">
-                        <label>Ora Cena:</label>
-                        <input type="time" id="time-cena" class="form-control" value="20:00" onchange="salvaOrariNotifiche()">
-                    </div>
-                </div>
-
-                <button class="btn btn-primary" style="width:100%; margin-top:6px;" onclick="attivaNotificheBrowser()">🔔 Attiva Notifiche sul Telefono</button>
-                <small id="notif-status-text" style="display:block; text-align:center; margin-top:6px; color:var(--purple-dark); font-weight:700;"></small>
-            </div>
-
-            <div class="card">
-                <h3>👤 Dati Personali & BMR</h3>
-                <div class="form-group">
-                    <label>Email per invio PDF/Archivio:</label>
-                    <input type="email" id="input-email" class="form-control" placeholder="tuaemail@example.com" onchange="salvaProfilo()">
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Peso (kg):</label>
-                        <input type="number" id="input-peso" class="form-control" value="65" onchange="calcolaBMR()">
-                    </div>
-                    <div class="form-group">
-                        <label>Altezza (cm):</label>
-                        <input type="number" id="input-altezza" class="form-control" value="165" onchange="calcolaBMR()">
-                    </div>
-                    <div class="form-group">
-                        <label>Età:</label>
-                        <input type="number" id="input-eta" class="form-control" value="22" onchange="calcolaBMR()">
-                    </div>
-                </div>
-                <div class="bmr-badge">
-                    Metabolismo Basale (BMR): <strong id="bmr-output">--</strong> kcal/giorno
-                </div>
-            </div>
-
-            <!-- ARCHIVIO -->
-            <div class="card">
-                <h3>📁 Archivio Settimane Passate</h3>
-                <div id="lista-archivio-settimane" style="margin-top:12px;"></div>
-            </div>
-        </main>
-
-        <!-- BARRA NAVIGAZIONE FISSA IN BASSO -->
-        <nav class="bottom-nav">
-            <button class="nav-item active" onclick="cambiaScheda('page-oggi', this)">
-                <span class="nav-icon">🏠</span>
-                <span>Oggi</span>
-            </button>
-            <button class="nav-item" onclick="cambiaScheda('page-piano', this)">
-                <span class="nav-icon">📅</span>
-                <span>Piano</span>
-            </button>
-            <button class="nav-item" onclick="cambiaScheda('page-catalogo', this)">
-                <span class="nav-icon">🥗</span>
-                <span>Dieta</span>
-            </button>
-            <button class="nav-item" onclick="cambiaScheda('page-asl', this)">
-                <span class="nav-icon">📋</span>
-                <span>ASL PDF</span>
-            </button>
-            <button class="nav-item" onclick="cambiaScheda('page-profilo', this)">
-                <span class="nav-icon">👤</span>
-                <span>Profilo</span>
-            </button>
-        </nav>
 
         <!-- MODALI -->
-        <div id="modal-edit-pasto" class="modal-overlay">
-            <div class="modal-card">
-                <h3>✍️ Modifica Pasto Mangiato</h3>
-                <p id="modal-cat-name" class="subtitle"></p>
-                <div class="form-group">
-                    <label>Alimento e grammi consumati effettivamente:</label>
-                    <input type="text" id="modal-pasto-input" class="form-control">
-                </div>
-                <div class="modal-buttons">
+        <div id="modal-edit-pasto" class="modal">
+            <div class="modal-content">
+                <h3 id="modal-cat-name">Modifica Pasto</h3>
+                <input type="text" id="modal-pasto-input" class="form-control" style="margin: 10px 0;">
+                <div class="btn-row">
+                    <button class="btn btn-primary" onclick="salvaModificaPasto()">Salva</button>
                     <button class="btn btn-secondary" onclick="chiudiModale('modal-edit-pasto')">Annulla</button>
-                    <button class="btn btn-primary" onclick="salvaModificaPasto()">Salva Pasto</button>
                 </div>
             </div>
         </div>
 
-        <div id="modal-rituale" class="modal-overlay">
-            <div class="modal-card">
-                <h3>🌙 Rituale della Domenica Sera</h3>
-                <div id="rituale-step-content" style="margin-top:10px;"></div>
-            </div>
-        </div>
-
-        <div id="modal-nuovo-cibo" class="modal-overlay">
-            <div class="modal-card">
-                <h3>➕ Aggiungi Alimento alla Dieta</h3>
-                <div class="form-group">
-                    <label>Categoria:</label>
-                    <select id="new-cibo-cat" class="form-control">
-                        <option value="Colazione">Colazione</option>
-                        <option value="Pranzo">Pranzo</option>
-                        <option value="Cena">Cena</option>
-                        <option value="Spuntino">Spuntino</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Alimento e Grammi:</label>
-                    <input type="text" id="new-cibo-nome" class="form-control" placeholder="Es. Pasta integrale 70g con pomodoro">
-                </div>
-                <div class="modal-buttons">
-                    <button class="btn btn-secondary" onclick="chiudiModale('modal-nuovo-cibo')">Annulla</button>
+        <div id="modal-nuovo-cibo" class="modal">
+            <div class="modal-content">
+                <h3>Aggiungi al Catalogo</h3>
+                <select id="new-cibo-cat" class="form-control" style="margin: 10px 0;">
+                    <option value="Colazione">Colazione</option>
+                    <option value="Spuntino">Spuntino</option>
+                    <option value="Pranzo">Pranzo</option>
+                    <option value="Cena">Cena</option>
+                </select>
+                <input type="text" id="new-cibo-nome" class="form-control" placeholder="Descrizione alimento e grammi" style="margin-bottom: 10px;">
+                <div class="btn-row">
                     <button class="btn btn-primary" onclick="salvaNuovoCiboCatalogo()">Aggiungi</button>
+                    <button class="btn btn-secondary" onclick="chiudiModale('modal-nuovo-cibo')">Annulla</button>
                 </div>
             </div>
         </div>
 
+        <div id="modal-rituale" class="modal">
+            <div class="modal-content">
+                <h3>Rituale della Domenica</h3>
+                <div id="rituale-step-content" style="margin-top: 10px;"></div>
+            </div>
+        </div>
+
+        <!-- NAVIGAZIONE INFERIORE -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" onclick="cambiaScheda('page-oggi', this)">📅 Oggi</button>
+            <button class="nav-item" onclick="cambiaScheda('page-piano', this)">✨ Piano</button>
+            <button class="nav-item" onclick="cambiaScheda('page-dieta', this)">🥗 Dieta</button>
+            <button class="nav-item" onclick="cambiaScheda('page-asl', this)">📄 ASL</button>
+            <button class="nav-item" onclick="cambiaScheda('page-profilo', this)">⚙️ Profilo</button>
+        </nav>
     </div>
 
     <script src="script.js"></script>
