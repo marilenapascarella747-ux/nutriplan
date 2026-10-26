@@ -1,5 +1,5 @@
 /* =========================================================
-   NUTRIPLAN ASL - SCRIPT FINALE CON UNIVERSITÀ E RITUALE DOMENICA
+   NUTRIPLAN ASL - SCRIPT DEFINITIVO
    ========================================================= */
 
 let dataSelezionata = new Date().toISOString().split('T')[0];
@@ -297,7 +297,6 @@ function avviaRitualeDomenica() {
     const modalContent = document.getElementById('rituale-step-content');
     if(!modalContent) return;
 
-    // Controllo se ci sono giorni vuoti nella settimana
     let giorniVuoti = [];
     giorniQuizList.forEach(g => {
         if (!window.menuAslSalvato[g] || Object.values(window.menuAslSalvato[g]).some(val => !val || val === '-')) {
