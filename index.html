@@ -60,7 +60,7 @@
                     <h2>📅 Pianificazione & Università</h2>
                     <p class="subtitle" style="margin-top: 5px;">Seleziona i giorni in cui sei all'Università:</p>
                     
-                    <div style="display: flex; flex-direction: column; gap: 6px; margin: 10px 0; font-size: 0.9rem;" id="container-chk-uni">
+                    <div style="display: flex; flex-direction: column; gap: 6px; margin: 10px 0; font-size: 0.9rem;">
                         <label><input type="checkbox" class="chk-uni" value="Lunedì"> Lunedì in Università</label>
                         <label><input type="checkbox" class="chk-uni" value="Martedì"> Martedì in Università</label>
                         <label><input type="checkbox" class="chk-uni" value="Mercoledì"> Mercoledì in Università</label>
@@ -71,9 +71,9 @@
                     </div>
 
                     <div class="btn-row" style="flex-direction: column; gap: 8px; margin-top: 10px;">
-                        <button class="btn btn-primary" style="width: 100%;" onclick="generaSettimanaAuto()">✨ Genera automaticamente (con Università)</button>
-                        <button class="btn btn-secondary" style="width: 100%; background-color: #f3e8ff; color: #7c3aed; font-weight: 700;" onclick="avviaQuizMenu()">📝 Crea il tuo menù (Quiz Manuale)</button>
-                        <button class="btn btn-secondary" style="width: 100%;" onclick="stampaMenuFamiglia()">🖨️ Stampa Tabella Menù</button>
+                        <button type="button" class="btn btn-primary" style="width: 100%;" onclick="generaSettimanaAuto()">✨ Genera automaticamente (con Università)</button>
+                        <button type="button" class="btn btn-secondary" style="width: 100%; background-color: #f3e8ff; color: #7c3aed; font-weight: 700;" onclick="avviaQuizMenu()">📝 Crea il tuo menù (Quiz Manuale)</button>
+                        <button type="button" class="btn btn-secondary" style="width: 100%;" onclick="stampaMenuFamiglia()">🖨️ Stampa Tabella Menù</button>
                     </div>
                 </div>
 
@@ -85,8 +85,8 @@
                     <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.85rem;" id="quiz-campi-container"></div>
 
                     <div class="btn-row" style="margin-top: 12px;">
-                        <button class="btn btn-primary" style="flex: 1;" onclick="proseguiQuizMenu()">Avanti ➡️</button>
-                        <button class="btn btn-secondary" onclick="annullaQuizMenu()">Annulla</button>
+                        <button type="button" class="btn btn-primary" style="flex: 1;" onclick="proseguiQuizMenu()">Avanti ➡️</button>
+                        <button type="button" class="btn btn-secondary" onclick="annullaQuizMenu()">Annulla</button>
                     </div>
                 </div>
 
@@ -109,7 +109,7 @@
                             </tbody>
                         </table>
                     </div>
-                    <button class="btn btn-primary no-print" style="margin-top: 15px; width: 100%;" onclick="window.print()">🖨️ Stampa Tabella</button>
+                    <button type="button" class="btn btn-primary no-print" style="margin-top: 15px; width: 100%;" onclick="window.print()">🖨️ Stampa Tabella</button>
                 </div>
             </section>
 
@@ -118,7 +118,7 @@
                 <div class="card">
                     <h2>🥗 Catalogo Cibi</h2>
                     <p class="subtitle" style="margin-top: 5px;">I tuoi alimenti inseriti per popolare i pasti.</p>
-                    <button class="btn btn-primary" style="margin-top: 12px;" onclick="apriModalNuovoCibo()">+ Aggiungi Alimento</button>
+                    <button type="button" class="btn btn-primary" style="margin-top: 12px;" onclick="apriModalNuovoCibo()">+ Aggiungi Alimento</button>
                 </div>
                 <div class="card">
                     <h3>Alimenti Disponibili</h3>
@@ -152,7 +152,7 @@
                             <tbody id="asl-table-body"></tbody>
                         </table>
                     </div>
-                    <button class="btn btn-primary" style="margin-top: 15px;" onclick="window.print()">Stampa Foglio ASL</button>
+                    <button type="button" class="btn btn-primary" style="margin-top: 15px;" onclick="window.print()">Stampa Foglio ASL</button>
                 </div>
             </section>
 
@@ -171,7 +171,7 @@
                 <div class="card" style="border: 2px solid #db2777; background: #fdf2f8;">
                     <h2>🌸 Rituale della Domenica</h2>
                     <p class="subtitle" style="margin-top: 5px;">Controlla se ci sono giorni vuoti, archivia e stampa la settimana.</p>
-                    <button class="btn btn-primary" style="margin-top: 10px; width: 100%;" onclick="avviaRitualeDomenica()">Avvia Rituale della Domenica</button>
+                    <button type="button" class="btn btn-primary" style="margin-top: 10px; width: 100%;" onclick="avviaRitualeDomenica()">Avvia Rituale della Domenica</button>
                 </div>
 
                 <div class="card">
@@ -188,8 +188,8 @@
                 <h3 id="modal-cat-name">Modifica Pasto</h3>
                 <input type="text" id="modal-pasto-input" class="form-control" style="margin: 10px 0;">
                 <div class="btn-row">
-                    <button class="btn btn-primary" onclick="salvaModificaPasto()">Salva</button>
-                    <button class="btn btn-secondary" onclick="chiudiModale('modal-edit-pasto')">Annulla</button>
+                    <button type="button" class="btn btn-primary" onclick="salvaModificaPasto()">Salva</button>
+                    <button type="button" class="btn btn-secondary" onclick="chiudiModale('modal-edit-pasto')">Annulla</button>
                 </div>
             </div>
         </div>
@@ -205,8 +205,8 @@
                 </select>
                 <input type="text" id="new-cibo-nome" class="form-control" placeholder="Descrizione alimento e grammi" style="margin-bottom: 10px;">
                 <div class="btn-row">
-                    <button class="btn btn-primary" onclick="salvaNuovoCiboCatalogo()">Aggiungi</button>
-                    <button class="btn btn-secondary" onclick="chiudiModale('modal-nuovo-cibo')">Annulla</button>
+                    <button type="button" class="btn btn-primary" onclick="salvaNuovoCiboCatalogo()">Aggiungi</button>
+                    <button type="button" class="btn btn-secondary" onclick="chiudiModale('modal-nuovo-cibo')">Annulla</button>
                 </div>
             </div>
         </div>
@@ -220,11 +220,11 @@
 
         <!-- NAVIGAZIONE INFERIORE -->
         <nav class="bottom-nav">
-            <button class="nav-item active" onclick="cambiaScheda('page-oggi', this)">📅 Oggi</button>
-            <button class="nav-item" onclick="cambiaScheda('page-piano', this)">✨ Piano</button>
-            <button class="nav-item" onclick="cambiaScheda('page-dieta', this)">🥗 Dieta</button>
-            <button class="nav-item" onclick="cambiaScheda('page-asl', this)">📄 ASL</button>
-            <button class="nav-item" onclick="cambiaScheda('page-profilo', this)">⚙️ Profilo</button>
+            <button type="button" class="nav-item active" onclick="cambiaScheda('page-oggi', this)">📅 Oggi</button>
+            <button type="button" class="nav-item" onclick="cambiaScheda('page-piano', this)">✨ Piano</button>
+            <button type="button" class="nav-item" onclick="cambiaScheda('page-dieta', this)">🥗 Dieta</button>
+            <button type="button" class="nav-item" onclick="cambiaScheda('page-asl', this)">📄 ASL</button>
+            <button type="button" class="nav-item" onclick="cambiaScheda('page-profilo', this)">⚙️ Profilo</button>
         </nav>
     </div>
 
