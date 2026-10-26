@@ -1,5 +1,5 @@
 /* =========================================================
-   NUTRIPLAN ASL - SCRIPT DEFINITIVO TABELLA VISIBILE
+   NUTRIPLAN ASL - SCRIPT PULITO E FUNZIONANTE
    ========================================================= */
 
 let dataSelezionata = new Date().toISOString().split('T')[0];
@@ -20,7 +20,7 @@ let catalogoNutrizionista = JSON.parse(localStorage.getItem('nutri_catalogo')) |
     { cat: 'Colazione', cibo: 'Yogurt Greco 0% (150g) + Avena (30g) + Noci (10g)' },
     { cat: 'Colazione', cibo: 'Latte P.S. (200ml) + 3 Fette biscottate integrali' },
     { cat: 'Pranzo', cibo: 'Riso integrale (70g) + Pollo (120g) + Zucchine' },
-    { cat: 'Pranzo', cibo: 'Panino integrale (80g) + Bresaola (60g) (Pranzo Uni)' },
+    { cat: 'Pranzo', cibo: 'Panino integrale (80g) + Bresaola (60g)' },
     { cat: 'Cena', cibo: 'Orata al forno (180g) + Insalata mista + Pane (40g)' },
     { cat: 'Cena', cibo: 'Petto di Tacchino ai ferri (150g) + Finocchi' },
     { cat: 'Spuntino', cibo: 'Mela (150g) + Mandorle (15g)' }
@@ -37,7 +37,6 @@ function avviaApp() {
     caricaDataCorrente();
     renderCatalogo();
 
-    // Se è la prima volta e non c'è un menù salvato, genera un menù di default così la tabella si vede subito!
     if (Object.keys(window.menuAslSalvato).length === 0) {
         generaSettimanaAutoSilenzioso();
     } else {
@@ -99,10 +98,10 @@ function setModalitaGiorno(luogo) {
 
     let pasti = registroGiornaliero[dataSelezionata].pasti;
     if (luogo === 'Uni') {
-        let ciboUni = catalogoNutrizionista.find(c => c.cibo.toLowerCase().includes('uni') || c.cibo.toLowerCase().includes('panino') || c.cibo.toLowerCase().includes('bresaola'))?.cibo;
+        let ciboUni = catalogoNutrizionista.find(c => c.cibo.toLowerCase().includes('panino') || c.cibo.toLowerCase().includes('bresaola'))?.cibo;
         pasti['Pranzo'] = ciboUni || 'Panino integrale con bresaola (Pranzo Uni)';
     } else {
-        let ciboCasa = catalogoNutrizionista.find(c => c.cat === 'Pranzo' && !c.cibo.toLowerCase().includes('uni'))?.cibo;
+        let ciboCasa = catalogoNutrizionista.find(c => c.cat === 'Pranzo' && !c.cibo.toLowerCase().includes('panino'))?.cibo;
         pasti['Pranzo'] = ciboCasa || 'Pranzo a casa';
     }
     salvaEDisegnaPasti();
@@ -234,7 +233,7 @@ function eliminaCiboCatalogo(index) {
     }
 }
 
-/* DIARIO ASL E TABELLA PIANO VISIBILI */
+/* DIARIO ASL E TABELLA PIANO */
 function renderDiarioASL() {
     const tbody = document.getElementById('asl-table-body');
     if(!tbody) return;
@@ -265,7 +264,7 @@ function renderTabellaPianoSalvata() {
     tbody.innerHTML = '';
 
     if (Object.keys(window.menuAslSalvato).length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#6b7280; padding: 15px;">Genera il menù o usa il quiz sopra.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#6b7280; padding: 15px;">Clicca su "Genera con un click" o usa il quiz.</td></tr>`;
         return;
     }
 
@@ -367,7 +366,7 @@ function renderArchivio() {
     });
 }
 
-/* GENERAZIONE SILENZIOSA INIZIALE */
+/* GENERAZIONE AUTOMATICA (PRENDE DALLA DIETA E GESTISCE IL PRANZO A SACCO PER UNIVERSITÀ) */
 function generaSettimanaAutoSilenzioso() {
     const chks = document.querySelectorAll('.chk-uni:checked');
     const giorniUni = Array.from(chks).map(c => c.value);
@@ -381,11 +380,22 @@ function generaSettimanaAutoSilenzioso() {
 
     giorniQuizList.forEach((g, idx) => {
         const isUni = giorniUni.includes(g);
+        
         let colazioneScelta = cibiColazione.length > 0 ? cibiColazione[idx % cibiColazione.length].cibo : 'Colazione';
         let spuntinoScelto = cibiSpuntino.length > 0 ? cibiSpuntino[idx % cibiSpuntino.length].cibo : 'Spuntino';
         let merendaScelta = cibiSpuntino.length > 1 ? cibiSpuntino[(idx + 1) % cibiSpuntino.length].cibo : spuntinoScelto;
         let cenaScelta = cibiCena.length > 0 ? cibiCena[idx % cibiCena.length].cibo : 'Cena';
-        let pranzoScelta = cibiPranzo.length > 0 ? cibiPranzo[idx % cibiPranzo.length].cibo : 'Pranzo';
+        let pranzoScelta = '';
+
+        if (isUni) {
+            // Se va all'università, cerca un pasto al sacco/panino dal catalogo
+            let cibiUniList = cibiPranzo.filter(c => c.cibo.toLowerCase().includes('panino') || c.cibo.toLowerCase().includes('bresaola') || c.cibo.toLowerCase().includes('sacco'));
+            pranzoScelta = cibiUniList.length > 0 ? cibiUniList[idx % cibiUniList.length].cibo : (cibiPranzo.length > 0 ? cibiPranzo[0].cibo : 'Pranzo al sacco');
+        } else {
+            // Pranzo normale da catalogo
+            let cibiCasaList = cibiPranzo.filter(c => !c.cibo.toLowerCase().includes('panino') && !c.cibo.toLowerCase().includes('bresaola'));
+            pranzoScelta = cibiCasaList.length > 0 ? cibiCasaList[idx % cibiCasaList.length].cibo : (cibiPranzo.length > 0 ? cibiPranzo[idx % cibiPranzo.length].cibo : 'Pranzo');
+        }
 
         window.menuAslSalvato[g] = {
             'Colazione': colazioneScelta,
@@ -401,10 +411,9 @@ function generaSettimanaAutoSilenzioso() {
     renderDiarioASL();
 }
 
-/* GENERAZIONE AUTOMATICA DA PULSANTE */
 function generaSettimanaAuto() {
     generaSettimanaAutoSilenzioso();
-    alert("Menù generato con successo e sincronizzato con l'ASL!");
+    alert("Menù generato con un click! I giorni in Università hanno il pranzo al sacco preso dalla tua dieta.");
 }
 
 /* QUIZ MANUALE (CREA IL TUO MENÙ) */
