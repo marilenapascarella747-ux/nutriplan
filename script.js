@@ -1,5 +1,5 @@
 /* =========================================================
-   NUTRIPLAN ASL - SCRIPT CORRETTO E FUNZIONANTE
+   NUTRIPLAN ASL - SCRIPT DEFINITIVO
    ========================================================= */
 
 let dataSelezionata = new Date().toISOString().split('T')[0];
@@ -130,7 +130,7 @@ function renderWaterTracker() {
 
     for (let i = 1; i <= Math.max(obiettivoAcqua, bicchieriAcqua); i++) {
         const filled = i <= bicchieriAcqua ? 'filled' : '';
-        container.innerHTML += `<button class="glass-btn ${filled}" onclick="registraAcqua(${i})">🥛</button>`;
+        container.innerHTML += `<button type="button" class="glass-btn ${filled}" onclick="registraAcqua(${i})">🥛</button>`;
     }
 }
 
@@ -152,7 +152,7 @@ function renderPastiOggi() {
                     <span class="meal-badge ${badgeClass}">${cat}</span>
                     <div class="meal-title">${val}</div>
                 </div>
-                <button class="btn btn-secondary btn-sm" onclick="apriEditPasto('${cat}', '${val.replace(/'/g, "\\'")}')">✏️ Modifica</button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="apriEditPasto('${cat}', '${val.replace(/'/g, "\\'")}')">✏️ Modifica</button>
             </div>
         `;
     }
@@ -196,7 +196,7 @@ function renderCatalogo() {
                     <span class="meal-badge badge-colazione">${item.cat}</span>
                     <div class="meal-title">${item.cibo}</div>
                 </div>
-                <button class="btn btn-secondary btn-sm" style="color:#ef4444;" onclick="eliminaCiboCatalogo(${index})">🗑️</button>
+                <button type="button" class="btn btn-secondary btn-sm" style="color:#ef4444;" onclick="eliminaCiboCatalogo(${index})">🗑️</button>
             </div>
         `;
     });
@@ -314,8 +314,8 @@ function avviaRitualeDomenica() {
 
     htmlReport += `
         <div class="btn-row" style="margin-top:14px;">
-            <button class="btn btn-primary" onclick="confermaArchiviazioneDomenica()">Archivia e Prepara Stampa</button>
-            <button class="btn btn-secondary" onclick="chiudiModale('modal-rituale')">Annulla</button>
+            <button type="button" class="btn btn-primary" onclick="confermaArchiviazioneDomenica()">Archivia e Prepara Stampa</button>
+            <button type="button" class="btn btn-secondary" onclick="chiudiModale('modal-rituale')">Annulla</button>
         </div>
     `;
 
@@ -355,7 +355,7 @@ function renderArchivio() {
     });
 }
 
-/* GENERAZIONE AUTOMATICA CON UNIVERSITÀ (CORRETTA E ROBUSTA) */
+/* GENERAZIONE AUTOMATICA CON UNIVERSITÀ (FORZATA E FUNZIONANTE) */
 function generaSettimanaAuto() {
     const tbody = document.getElementById('lista-piano-settimana');
     if(!tbody) return;
