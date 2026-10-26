@@ -57,8 +57,8 @@
             <!-- SCHEDA 2: PIANO & QUIZ UNIVERSITÀ -->
             <section id="page-piano" class="page">
                 <div class="card no-print">
-                    <h2>📅 Quiz Università</h2>
-                    <p class="subtitle" style="margin-top: 5px;">Seleziona i giorni in cui sei all'Università:</p>
+                    <h2>📅 Pianificazione Settimanale</h2>
+                    <p class="subtitle" style="margin-top: 5px;">Scegli come generare il tuo menù:</p>
                     
                     <div style="display: flex; flex-direction: column; gap: 6px; margin: 12px 0; font-size: 0.9rem;">
                         <label><input type="checkbox" class="chk-uni" value="Lunedì"> Lunedì in Università</label>
@@ -70,9 +70,12 @@
                         <label><input type="checkbox" class="chk-uni" value="Domenica"> Domenica in Università</label>
                     </div>
 
-                    <div class="btn-row">
-                        <button class="btn btn-primary" onclick="generaSettimanaAuto()">✨ Genera Tabella Menù</button>
-                        <button class="btn btn-secondary" onclick="stampaMenuFamiglia()">🖨️ Stampa Tabella Menù</button>
+                    <div class="btn-row" style="flex-direction: column; gap: 8px;">
+                        <div style="display: flex; gap: 8px;">
+                            <button class="btn btn-primary" style="flex: 1;" onclick="generaSettimanaAuto()">✨ Genera Automatico</button>
+                            <button class="btn btn-secondary" style="flex: 1; background-color: #f3e8ff; color: #7c3aed;" onclick="avviaQuizMenu()">📝 Crea il tuo menù (Quiz)</button>
+                        </div>
+                        <button class="btn btn-secondary" style="width: 100%;" onclick="stampaMenuFamiglia()">🖨️ Stampa Tabella Menù</button>
                     </div>
                 </div>
 
@@ -91,7 +94,7 @@
                                 </tr>
                             </thead>
                             <tbody id="lista-piano-settimana">
-                                <tr><td colspan="6" style="text-align:center; color:#6b7280; padding: 15px;">Clicca su "Genera Tabella Menù" sopra.</td></tr>
+                                <tr><td colspan="6" style="text-align:center; color:#6b7280; padding: 15px;">Genera il menù automaticamente o tramite il quiz.</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -182,6 +185,23 @@
                 <div class="btn-row">
                     <button class="btn btn-primary" onclick="salvaNuovoCiboCatalogo()">Aggiungi</button>
                     <button class="btn btn-secondary" onclick="chiudiModale('modal-nuovo-cibo')">Annulla</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODALE QUIZ INTERATTIVO CREA IL TUO MENÙ -->
+        <div id="modal-quiz-menu" class="modal">
+            <div class="modal-content" style="max-width: 380px; max-height: 85vh; overflow-y: auto;">
+                <h3 id="quiz-titolo-giorno" style="color: var(--accent); margin-bottom: 10px;">Crea Menù</h3>
+                <p id="quiz-istruzioni" class="subtitle" style="margin-bottom: 10px;">Seleziona il cibo dal tuo catalogo per ogni pasto:</p>
+                
+                <div style="display: flex; flex-direction: column; gap: 10px; font-size: 0.85rem;" id="quiz-campi-container">
+                    <!-- I campi dei pasti verranno inseriti qui dinamicamente -->
+                </div>
+
+                <div class="btn-row" style="margin-top: 15px;">
+                    <button class="btn btn-primary" style="flex: 1;" onclick="proseguiQuizMenu()">Avanti / Salva</button>
+                    <button class="btn btn-secondary" onclick="chiudiModale('modal-quiz-menu')">Annulla</button>
                 </div>
             </div>
         </div>
