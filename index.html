@@ -54,14 +54,24 @@
                 </div>
             </section>
 
-            <!-- SCHEDA 2: PIANO & QUIZ -->
+            <!-- SCHEDA 2: PIANO & QUIZ UNIVERSITÀ -->
             <section id="page-piano" class="page">
                 <div class="card no-print">
-                    <h2>📅 Pianificazione Settimanale</h2>
-                    <p class="subtitle" style="margin-top: 5px;">Scegli come creare il tuo menù:</p>
+                    <h2>📅 Pianificazione & Università</h2>
+                    <p class="subtitle" style="margin-top: 5px;">Seleziona i giorni in cui sei all'Università:</p>
                     
-                    <div class="btn-row" style="margin-top: 10px; flex-direction: column; gap: 8px;">
-                        <button class="btn btn-primary" style="width: 100%;" onclick="generaSettimanaAuto()">✨ Genera Automatico</button>
+                    <div style="display: flex; flex-direction: column; gap: 6px; margin: 10px 0; font-size: 0.9rem;" id="container-chk-uni">
+                        <label><input type="checkbox" class="chk-uni" value="Lunedì"> Lunedì in Università</label>
+                        <label><input type="checkbox" class="chk-uni" value="Martedì"> Martedì in Università</label>
+                        <label><input type="checkbox" class="chk-uni" value="Mercoledì"> Mercoledì in Università</label>
+                        <label><input type="checkbox" class="chk-uni" value="Giovedì"> Giovedì in Università</label>
+                        <label><input type="checkbox" class="chk-uni" value="Venerdì"> Venerdì in Università</label>
+                        <label><input type="checkbox" class="chk-uni" value="Sabato"> Sabato in Università</label>
+                        <label><input type="checkbox" class="chk-uni" value="Domenica"> Domenica in Università</label>
+                    </div>
+
+                    <div class="btn-row" style="flex-direction: column; gap: 8px; margin-top: 10px;">
+                        <button class="btn btn-primary" style="width: 100%;" onclick="generaSettimanaAuto()">✨ Genera Automatico (con Università)</button>
                         <button class="btn btn-secondary" style="width: 100%; background-color: #f3e8ff; color: #7c3aed; font-weight: 700;" onclick="avviaQuizMenu()">📝 Crea il tuo menù (Quiz Manuale)</button>
                         <button class="btn btn-secondary" style="width: 100%;" onclick="stampaMenuFamiglia()">🖨️ Stampa Tabella Menù</button>
                     </div>
@@ -95,7 +105,7 @@
                                 </tr>
                             </thead>
                             <tbody id="lista-piano-settimana">
-                                <tr><td colspan="6" style="text-align:center; color:#6b7280; padding: 15px;">Usa il generatore automatico o il quiz sopra.</td></tr>
+                                <tr><td colspan="6" style="text-align:center; color:#6b7280; padding: 15px;">Genera il menù o usa il quiz sopra.</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -125,7 +135,7 @@
                 </div>
                 
                 <div class="card asl-preview-card">
-                    <h3>Diario ASL</h3>
+                    <h3>Diario ASL (Sincronizzato)</h3>
                     <div class="asl-container" style="position: relative; margin-top: 10px; overflow-x: auto;">
                         <img id="asl-background-img" style="display:none; width: 100%; border-radius: 8px;" alt="Sfondo ASL">
                         <table class="asl-table" style="width: 100%; font-size: 0.8rem; margin-top: 10px;">
@@ -158,10 +168,10 @@
                     <p style="margin-top: 10px; font-size: 0.85rem;">BMR Calcolato: <strong id="bmr-output">--</strong> kcal</p>
                 </div>
 
-                <div class="card">
+                <div class="card" style="border: 2px solid #db2777; background: #fdf2f8;">
                     <h2>🌸 Rituale della Domenica</h2>
-                    <p class="subtitle" style="margin-top: 5px;">Archivia la settimana e prepara la successiva.</p>
-                    <button class="btn btn-primary" style="margin-top: 10px;" onclick="apriRitualeDomenica()">Avvia Rituale</button>
+                    <p class="subtitle" style="margin-top: 5px;">Controlla se ci sono giorni vuoti, archivia e stampa la settimana.</p>
+                    <button class="btn btn-primary" style="margin-top: 10px; width: 100%;" onclick="avviaRitualeDomenica()">Avvia Rituale della Domenica</button>
                 </div>
 
                 <div class="card">
@@ -202,9 +212,9 @@
         </div>
 
         <div id="modal-rituale" class="modal">
-            <div class="modal-content">
-                <h3>Rituale della Domenica</h3>
-                <div id="rituale-step-content" style="margin-top: 10px;"></div>
+            <div class="modal-content" style="max-width: 360px;">
+                <h3>🌸 Rituale della Domenica</h3>
+                <div id="rituale-step-content" style="margin-top: 10px; font-size: 0.85rem;"></div>
             </div>
         </div>
 
