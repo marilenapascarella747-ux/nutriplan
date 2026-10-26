@@ -1,5 +1,5 @@
 /* =========================================================
-   NUTRIPLAN ASL - SCRIPT DEFINITIVO
+   NUTRIPLAN ASL - SCRIPT DEFINITIVO TABELLA CORRETTA
    ========================================================= */
 
 let dataSelezionata = new Date().toISOString().split('T')[0];
@@ -247,15 +247,11 @@ function renderDiarioASL() {
                 <td>${pastiGiorno['Colazione'] || '-'}</td>
                 <td>${pastiGiorno['Spuntino M.'] || '-'}</td>
                 <td>${pastiGiorno['Pranzo'] || '-'}</td>
-                <td>${pastiInfoMerenda(pastiGiorno)}</td>
+                <td>${pastiGiorno['Merenda'] || '-'}</td>
                 <td>${pastiGiorno['Cena'] || '-'}</td>
             </tr>
         `;
     });
-}
-
-function pastiInfoMerenda(pasti) {
-    return pasti['Merenda'] || pasti['Spuntino M.'] || '-';
 }
 
 function generaSettimanaAuto() {
@@ -277,6 +273,7 @@ function generaSettimanaAuto() {
         
         let colazioneScelta = cibiColazione.length > 0 ? cibiColazione[idx % cibiColazione.length].cibo : 'Colazione';
         let spuntinoScelto = cibiSpuntino.length > 0 ? cibiSpuntino[idx % cibiSpuntino.length].cibo : 'Spuntino';
+        let merendaScelta = cibiSpuntino.length > 1 ? cibiSpuntino[(idx + 1) % cibiSpuntino.length].cibo : spuntinoScelto;
         let pranzoScelto = '';
         
         if (isUni) {
@@ -303,12 +300,12 @@ function generaSettimanaAuto() {
                 <td>${colazioneScelta}</td>
                 <td>${spuntinoScelto}</td>
                 <td>${pranzoScelto}</td>
-                <td>${spuntinoScelto}</td>
+                <td>${merendaScelta}</td>
                 <td>${cenaScelta}</td>
             </tr>
         `;
     });
-    alert("Tabella menù generata con successo!");
+    alert("Tabella menù generata correttamente!");
 }
 
 function stampaMenuFamiglia() { 
