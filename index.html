@@ -57,7 +57,7 @@
             <!-- SCHEDA 2: PIANO & QUIZ UNIVERSITÀ -->
             <section id="page-piano" class="page">
                 <div class="card">
-                    <h2>📅 Piano & Quiz Università</h2>
+                    <h2>📅 Quiz & Menù Settimanale</h2>
                     <p class="subtitle" style="margin-top: 5px;">Seleziona i giorni in cui sei all'Università:</p>
                     
                     <div style="display: flex; flex-direction: column; gap: 6px; margin: 12px 0; font-size: 0.9rem;">
@@ -71,15 +71,29 @@
                     </div>
 
                     <div class="btn-row">
-                        <button class="btn btn-primary" onclick="generaSettimanaAuto()">✨ Genera Menù</button>
-                        <button class="btn btn-secondary" onclick="stampaMenuFamiglia()">🖨️ Stampa Menù</button>
+                        <button class="btn btn-primary" onclick="generaSettimanaAuto()">✨ Genera Tabella Menù</button>
+                        <button class="btn btn-secondary" onclick="stampaMenuFamiglia()">🖨️ Stampa Tabella Menù</button>
                     </div>
                 </div>
 
                 <div class="card">
-                    <h3>📋 Anteprima Piano</h3>
-                    <div id="lista-piano-settimana" style="margin-top: 10px;">
-                        <p class="subtitle">Genera il menù per visualizzarlo qui.</p>
+                    <h3>📋 Tabella Menù Settimanale</h3>
+                    <div class="asl-container" style="position: relative; margin-top: 10px; overflow-x: auto;">
+                        <table class="asl-table" style="width: 100%; font-size: 0.75rem;">
+                            <thead>
+                                <tr style="background: #fdf2f8; color: #db2777;">
+                                    <th>Giorno</th>
+                                    <th>Colazione</th>
+                                    <th>Spuntino</th>
+                                    <th>Pranzo</th>
+                                    <th>Merenda</th>
+                                    <th>Cena</th>
+                                </tr>
+                            </thead>
+                            <tbody id="lista-piano-settimana">
+                                <tr><td colspan="6" style="text-align:center; color:#6b7280;">Clicca su "Genera Tabella Menù" sopra.</td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </section>
