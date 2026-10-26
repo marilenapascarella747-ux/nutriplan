@@ -1,9 +1,11 @@
 /* =========================================================
-   NUTRIPLAN ASL - LOGICA COMPLETA CON OPZIONI E QUIZ GIORNI UNI
+   NUTRIPLAN ASL - LOGICA DEFINITIVA CATALOGO E STAMPA
    ========================================================= */
 
 let dataSelezionata = new Date().toISOString().split('T')[0];
-document.getElementById('select-date-picker').value = dataSelezionata;
+if(document.getElementById('select-date-picker')) {
+    document.getElementById('select-date-picker').value = dataSelezionata;
+}
 
 let bicchieriAcqua = 0;
 let obiettivoAcqua = parseInt(localStorage.getItem('nutri_obiettivo_acqua')) || 8;
@@ -25,14 +27,14 @@ let catalogoNutrizionista = JSON.parse(localStorage.getItem('nutri_catalogo')) |
 let archivioSettimane = JSON.parse(localStorage.getItem('nutri_archivio')) || [];
 
 function avviaApp() {
-    document.getElementById('water-goal-select').value = obiettivoAcqua;
+    if(document.getElementById('water-goal-select')) {
+        document.getElementById('water-goal-select').value = obiettivoAcqua;
+    }
     caricaDataCorrente();
     renderCatalogo();
     renderDiarioASL();
     calcolaBMR();
     renderArchivio();
-    caricaOrariNotifiche();
-    avviaControlloNotifiche();
 }
 
 function cambiaDataSelezionata(nuovaData) {
@@ -41,8 +43,11 @@ function cambiaDataSelezionata(nuovaData) {
 }
 
 function caricaDataCorrente() {
-    const d = new Date(dataSelezionata + 'T00:00:00');
-    document.getElementById('display-giorno-nome').innerText = d.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'short' });
+    const elNome = document.getElementById('display-giorno-nome');
+    if(elNome) {
+        const d = new Date(dataSelezionata + 'T00:00:00');
+        elNome.innerText = d.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'short' });
+    }
 
     if (!registroGiornaliero[dataSelezionata]) {
         registroGiornaliero[dataSelezionata] = {
@@ -76,8 +81,10 @@ function cambiaScheda(schedaId, btn) {
 
 function setModalitaGiorno(luogo) {
     modalitaGiorno = luogo;
-    document.getElementById('btn-mode-casa').classList.toggle('active', luogo === 'Casa');
-    document.getElementById('btn-mode-uni').classList.toggle('active', luogo === 'Uni');
+    const btnCasa = document.getElementById('btn-mode-casa');
+    const btnUni = document.getElementById('btn-mode-uni');
+    if(btnCasa) btnCasa.classList.toggle('active', luogo === 'Casa');
+    if(btnUni) btnUni.classList.toggle('active', luogo === 'Uni');
 
     let pasti = registroGiornaliero[dataSelezionata].pasti;
     if (luogo === 'Uni') {
@@ -111,8 +118,10 @@ function aggiungiBicchiereExtra() {
 }
 
 function renderWaterTracker() {
-    document.getElementById('water-text').innerText = `${bicchieriAcqua} / ${obiettivoAcqua} bicchieri`;
+    const textEl = document.getElementById('water-text');
+    if(textEl) textEl.innerText = `${bicchieriAcqua} / ${obiettivoAcqua} bicchieri`;
     const container = document.getElementById('water-container');
+    if(!container) return;
     container.innerHTML = '';
 
     for (let i = 1; i <= Math.max(obiettivoAcqua, bicchieriAcqua); i++) {
@@ -123,6 +132,7 @@ function renderWaterTracker() {
 
 function renderPastiOggi() {
     const container = document.getElementById('lista-pasti-oggi');
+    if(!container) return;
     container.innerHTML = '';
     let pasti = registroGiornaliero[dataSelezionata].pasti;
 
@@ -172,6 +182,7 @@ function chiudiModale(id) {
 
 function renderCatalogo() {
     const container = document.getElementById('lista-catalogo-cibi');
+    if(!container) return;
     container.innerHTML = '';
 
     catalogoNutrizionista.forEach((item, index) => {
@@ -214,6 +225,7 @@ function eliminaCiboCatalogo(index) {
 
 function renderDiarioASL() {
     const tbody = document.getElementById('asl-table-body');
+    if(!tbody) return;
     tbody.innerHTML = '';
     const giorni = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'];
     let pasti = registroGiornaliero[dataSelezionata].pasti;
@@ -239,8 +251,10 @@ function caricaFoglioASL(event) {
         reader.onload = function(e) {
             const imgData = e.target.result;
             const imgElement = document.getElementById('asl-background-img');
-            imgElement.src = imgData;
-            imgElement.style.display = 'block';
+            if(imgElement) {
+                imgElement.src = imgData;
+                imgElement.style.display = 'block';
+            }
             localStorage.setItem('nutri_foglio_asl_bg', imgData);
             alert("Foglio caricato con successo!");
         };
@@ -248,24 +262,28 @@ function caricaFoglioASL(event) {
     }
 }
 
-/* GENERAZIONE GUIDATA TRAMITE QUIZ GIORNI UNI E CATALOGO */
+/* GENERAZIONE SETTIMANA VARIATA DAL CATALOGO (GIORNO PER GIORNO) */
 function generaSettimanaAuto() {
     const container = document.getElementById('lista-piano-settimana');
+    if(!container) return;
     container.innerHTML = '';
     const giorni = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'];
     
-    // Legge le preferenze dai checkbox della schermata Piano (il quiz dei giorni Uni)
     const chks = document.querySelectorAll('.chk-uni:checked');
     const giorniUni = Array.from(chks).map(c => c.value);
 
+    // Filtriamo dal TUO catalogo reale
     const cibiColazione = catalogoNutrizionista.filter(c => c.cat === 'Colazione');
     const cibiPranzo = catalogoNutrizionista.filter(c => c.cat === 'Pranzo');
     const cibiCena = catalogoNutrizionista.filter(c => c.cat === 'Cena');
+    const cibiSpuntino = catalogoNutrizionista.filter(c => c.cat === 'Spuntino');
 
     giorni.forEach((g, idx) => {
         const isUni = giorniUni.includes(g);
         
+        // Rotazione intelligente: prende i cibi diversi che hai inserito tu in sequenza (idx % lunghezza)
         let colazioneScelta = cibiColazione.length > 0 ? cibiColazione[idx % cibiColazione.length].cibo : 'Colazione';
+        let spuntinoScelto = cibiSpuntino.length > 0 ? cibiSpuntino[idx % cibiSpuntino.length].cibo : 'Spuntino';
         let pranzoScelto = '';
         
         if (isUni) {
@@ -285,41 +303,43 @@ function generaSettimanaAuto() {
         }
 
         let cenaScelta = cibiCena.length > 0 ? cibiCena[idx % cibiCena.length].cibo : 'Cena';
-        if (cibiCena.length > 1) {
-            cenaScelta = cibiCena[idx % cibiCena.length].cibo;
-        }
 
         container.innerHTML += `
-            <div class="meal-row">
+            <div class="meal-row" style="margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 8px;">
                 <div>
                     <strong>${g} ${isUni ? '🎓 (Università)' : '🏠 (Casa)'}:</strong><br>
-                    ☕ ${colazioneScelta}<br>
+                    ☕ <strong>Colazione:</strong> ${colazioneScelta}<br>
+                    🍏 <strong>Spuntino:</strong> ${spuntinoScelto}<br>
                     🍝 <strong>Pranzo:</strong> ${pranzoScelto}<br>
                     🐟 <strong>Cena:</strong> ${cenaScelta}
                 </div>
             </div>
         `;
     });
-    alert("Menù generato seguendo le tue preferenze e i giorni di Università!");
+    alert("Menù generato variando i tuoi cibi personalizzati per ogni giorno!");
 }
 
-function stampaMenuFamiglia() { window.print(); }
+function stampaMenuFamiglia() { 
+    window.print(); 
+}
 
 function calcolaBMR() {
-    const peso = parseFloat(document.getElementById('input-peso').value) || 0;
-    const altezza = parseFloat(document.getElementById('input-altezza').value) || 0;
-    const eta = parseInt(document.getElementById('input-eta').value) || 0;
+    const peso = parseFloat(document.getElementById('input-peso')?.value) || 0;
+    const altezza = parseFloat(document.getElementById('input-altezza')?.value) || 0;
+    const eta = parseInt(document.getElementById('input-eta')?.value) || 0;
     const bmr = (10 * peso) + (6.25 * altezza) - (5 * eta) - 161;
-    document.getElementById('bmr-output').innerText = Math.round(bmr);
+    const out = document.getElementById('bmr-output');
+    if(out) out.innerText = Math.round(bmr);
 }
 
 function salvaProfilo() {
-    const email = document.getElementById('input-email').value;
+    const email = document.getElementById('input-email')?.value || '';
     localStorage.setItem('nutri_user_email', email);
 }
 
 function renderArchivio() {
     const container = document.getElementById('lista-archivio-settimane');
+    if(!container) return;
     container.innerHTML = '';
 
     if (archivioSettimane.length === 0) {
@@ -333,28 +353,14 @@ function renderArchivio() {
                 <div>
                     <strong>Domenica ${sett.data}:</strong> Diario ASL & Menù Famiglia
                 </div>
-                <div style="display:flex; gap:4px;">
-                    <button class="btn btn-sm btn-secondary" onclick="apriDiarioArchivio(${idx})">📋 ASL</button>
-                    <button class="btn btn-sm btn-secondary" onclick="inviaEmailArchivio('${sett.data}')">✉️ Email</button>
-                </div>
             </div>
         `;
     });
 }
 
-function inviaEmailArchivio(dataSettimana) {
-    const email = localStorage.getItem('nutri_user_email') || '';
-    if (!email) {
-        alert("Inserisci prima la tua email nella sezione Profilo!");
-        return;
-    }
-    const subject = encodeURIComponent("NutriPlan ASL - Diario Settimana " + dataSettimana);
-    const body = encodeURIComponent("In allegato/riassunto il diario alimentare ASL e il menù settimanale della settimana del " + dataSettimana);
-    window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
-}
-
 function apriRitualeDomenica() {
     const modalContent = document.getElementById('rituale-step-content');
+    if(!modalContent) return;
     modalContent.innerHTML = `
         <p class="subtitle"><strong>Fase 1: Controllo Pasti Mancanti</strong></p>
         <p style="font-size:0.85rem; margin-top:8px;">Hai registrato tutti i pasti di questa settimana per il foglio ASL?</p>
@@ -373,12 +379,12 @@ function concludiRitualeStep2() {
     renderArchivio();
 
     const modalContent = document.getElementById('rituale-step-content');
+    if(!modalContent) return;
     modalContent.innerHTML = `
         <p class="subtitle"><strong>Fase 2: Salvataggio & Nuova Settimana</strong></p>
         <p style="font-size:0.85rem; margin-top:8px;">✅ Settimana salvata in Archivio!</p>
         <div class="btn-row" style="margin-top:14px;">
-            <button class="btn btn-primary" onclick="chiudiModale('modal-rituale'); cambiaScheda('page-asl', document.querySelectorAll('.nav-item')[3]); window.print();">📋 Stampa ASL PDF</button>
-            <button class="btn btn-secondary" onclick="chiudiModale('modal-rituale'); cambiaScheda('page-piano', document.querySelectorAll('.nav-item')[1]);">📅 Pianifica Nuova Settimana</button>
+            <button class="btn btn-primary" onclick="chiudiModale('modal-rituale'); window.print();">📋 Stampa Menù</button>
         </div>
     `;
 }
