@@ -1,313 +1,327 @@
-:root {
-    --primary: #db2777;
-    --primary-light: #fdf2f8;
-    --accent: #7c3aed;
-    --bg: #f9fafb;
-    --card-bg: #ffffff;
-    --text: #1f2937;
-    --text-muted: #6b7280;
-    --border: #f3f4f6;
+/* =========================================================
+   NUTRIPLAN ASL - SCRIPT DEFINITIVO
+   ========================================================= */
+
+let dataSelezionata = new Date().toISOString().split('T')[0];
+if(document.getElementById('select-date-picker')) {
+    document.getElementById('select-date-picker').value = dataSelezionata;
 }
 
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-}
+let bicchieriAcqua = 0;
+let obiettivoAcqua = parseInt(localStorage.getItem('nutri_obiettivo_acqua')) || 8;
+let modalitaGiorno = 'Casa';
+let pastoInModifica = '';
 
-body {
-    background-color: var(--bg);
-    color: var(--text);
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    min-height: 100vh;
-}
+let registroGiornaliero = JSON.parse(localStorage.getItem('nutri_registro_giorni')) || {};
 
-.app-container {
-    width: 100%;
-    max-width: 480px;
-    background-color: var(--card-bg);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-    position: relative;
-    padding-bottom: 70px;
-}
+let catalogoNutrizionista = JSON.parse(localStorage.getItem('nutri_catalogo')) || [
+    { cat: 'Colazione', cibo: 'Yogurt Greco 0% (150g) + Avena (30g) + Noci (10g)' },
+    { cat: 'Colazione', cibo: 'Latte P.S. (200ml) + 3 Fette biscottate integrali' },
+    { cat: 'Pranzo', cibo: 'Riso integrale (70g) + Pollo (120g) + Zucchine' },
+    { cat: 'Pranzo', cibo: 'Panino integrale (80g) con Bresaola (60g) (Pranzo Uni)' },
+    { cat: 'Cena', cibo: 'Orata al forno (180g) + Insalata mista + Pane (40g)' },
+    { cat: 'Cena', cibo: 'Petto di Tacchino ai ferri (150g) + Finocchi' },
+    { cat: 'Spuntino', cibo: 'Mela (150g) + Mandorle (15g)' }
+];
 
-.app-header {
-    background: linear-gradient(135deg, #fdf2f8, #f3e8ff);
-    padding: 20px 16px;
-    text-align: center;
-    border-bottom: 1px solid var(--border);
-}
-
-.app-header h1 {
-    font-size: 1.25rem;
-    color: var(--primary);
-    font-weight: 700;
-}
-
-.subtitle {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    margin-top: 4px;
-}
-
-.main-content {
-    padding: 16px;
-    flex: 1;
-    overflow-y: auto;
-}
-
-.page {
-    display: none;
-    flex-direction: column;
-    gap: 16px;
-}
-
-.page.active {
-    display: flex;
-}
-
-.card {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 14px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-}
-
-.card h2 {
-    font-size: 1rem;
-    color: var(--accent);
-    margin-bottom: 4px;
-}
-
-.card h3 {
-    font-size: 0.9rem;
-    color: var(--text);
-    margin-bottom: 6px;
-}
-
-.form-control {
-    width: 100%;
-    padding: 8px 12px;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    font-size: 0.85rem;
-    outline: none;
-    transition: border-color 0.2s;
-}
-
-.form-control:focus {
-    border-color: var(--primary);
-}
-
-.btn {
-    padding: 8px 14px;
-    border-radius: 8px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    cursor: pointer;
-    border: none;
-    transition: opacity 0.2s;
-}
-
-.btn:active {
-    opacity: 0.8;
-}
-
-.btn-primary {
-    background-color: var(--primary);
-    color: white;
-}
-
-.btn-secondary {
-    background-color: var(--border);
-    color: var(--text);
-}
-
-.btn-secondary.active {
-    background-color: var(--accent);
-    color: white;
-}
-
-.btn-sm {
-    padding: 4px 8px;
-    font-size: 0.75rem;
-}
-
-.btn-row {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
-.meal-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 0;
-    border-bottom: 1px solid var(--border);
-    font-size: 0.85rem;
-}
-
-.meal-row:last-child {
-    border-bottom: none;
-}
-
-.meal-badge {
-    display: inline-block;
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-size: 0.7rem;
-    font-weight: 600;
-    margin-bottom: 2px;
-}
-
-.badge-colazione { background: #fef3c7; color: #d97706; }
-.badge-pranzo { background: #dbeafe; color: #1d4ed8; }
-.badge-cena { background: #d1fae5; color: #047857; }
-.badge-spuntino { background: #f3e8ff; color: #7c3aed; }
-
-.meal-title {
-    font-weight: 500;
-    color: var(--text);
-}
-
-.water-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 6px;
-}
-
-.glass-btn {
-    background: var(--border);
-    border: none;
-    border-radius: 6px;
-    padding: 6px 10px;
-    font-size: 1rem;
-    cursor: pointer;
-}
-
-.glass-btn.filled {
-    background: #e0f2fe;
-    border: 1px solid #38bdf8;
-}
-
-.bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100%;
-    max-width: 480px;
-    height: 60px;
-    background: white;
-    border-top: 1px solid var(--border);
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    z-index: 100;
-}
-
-.nav-item {
-    background: none;
-    border: none;
-    font-size: 0.7rem;
-    color: var(--text-muted);
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-}
-
-.nav-item.active {
-    color: var(--primary);
-    font-weight: 600;
-}
-
-.modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.4);
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    padding: 16px;
-}
-
-.modal.active {
-    display: flex;
-}
-
-.modal-content {
-    background: white;
-    padding: 20px;
-    border-radius: 12px;
-    width: 100%;
-    max-width: 320px;
-}
-
-.asl-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.asl-table th, .asl-table td {
-    border: 1px solid #e5e7eb;
-    padding: 6px;
-    text-align: left;
-    vertical-align: top;
-}
-
-@media print {
-    .bottom-nav, .app-header, .btn, button, input[type="file"], .modal, .no-print {
-        display: none !important;
+function avviaApp() {
+    if(document.getElementById('water-goal-select')) {
+        document.getElementById('water-goal-select').value = obiettivoAcqua;
     }
-    body, .app-container, .main-content {
-        background: white !important;
-        height: auto !important;
-        overflow: visible !important;
-        box-shadow: none !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        width: 100% !important;
-        max-width: 100% !important;
+    caricaDataCorrente();
+    renderCatalogo();
+    renderDiarioASL();
+    calcolaBMR();
+}
+
+function cambiaDataSelezionata(nuovaData) {
+    dataSelezionata = nuovaData;
+    caricaDataCorrente();
+}
+
+function caricaDataCorrente() {
+    const elNome = document.getElementById('display-giorno-nome');
+    if(elNome) {
+        const d = new Date(dataSelezionata + 'T00:00:00');
+        elNome.innerText = d.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'short' });
     }
-    .page {
-        display: none !important;
+
+    if (!registroGiornaliero[dataSelezionata]) {
+        registroGiornaliero[dataSelezionata] = {
+            pasti: {
+                'Colazione': catalogoNutrizionista.find(c => c.cat === 'Colazione')?.cibo || 'Colazione',
+                'Spuntino M.': catalogoNutrizionista.find(c => c.cat === 'Spuntino')?.cibo || 'Spuntino',
+                'Pranzo': catalogoNutrizionista.find(c => c.cat === 'Pranzo')?.cibo || 'Pranzo',
+                'Merenda': catalogoNutrizionista.find(c => c.cat === 'Spuntino')?.cibo || 'Merenda',
+                'Cena': catalogoNutrizionista.find(c => c.cat === 'Cena')?.cibo || 'Cena'
+            },
+            acqua: 0
+        };
     }
-    .page.active {
-        display: flex !important;
+
+    bicchieriAcqua = registroGiornaliero[dataSelezionata].acqua || 0;
+    renderPastiOggi();
+    renderWaterTracker();
+    renderDiarioASL();
+}
+
+function salvaRegistroGiornaliero() {
+    localStorage.setItem('nutri_registro_giorni', JSON.stringify(registroGiornaliero));
+}
+
+function cambiaScheda(schedaId, btn) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+    document.getElementById(schedaId).classList.add('active');
+    btn.classList.add('active');
+}
+
+function setModalitaGiorno(luogo) {
+    modalitaGiorno = luogo;
+    const btnCasa = document.getElementById('btn-mode-casa');
+    const btnUni = document.getElementById('btn-mode-uni');
+    if(btnCasa) btnCasa.classList.toggle('active', luogo === 'Casa');
+    if(btnUni) btnUni.classList.toggle('active', luogo === 'Uni');
+
+    let pasti = registroGiornaliero[dataSelezionata].pasti;
+    if (luogo === 'Uni') {
+        let ciboUni = catalogoNutrizionista.find(c => c.cibo.toLowerCase().includes('uni') || c.cibo.toLowerCase().includes('panino') || c.cibo.toLowerCase().includes('bresaola'))?.cibo;
+        pasti['Pranzo'] = ciboUni || 'Panino integrale con bresaola (Pranzo Uni)';
+    } else {
+        let ciboCasa = catalogoNutrizionista.find(c => c.cat === 'Pranzo' && !c.cibo.toLowerCase().includes('uni'))?.cibo;
+        pasti['Pranzo'] = ciboCasa || 'Pranzo a casa';
     }
-    .card {
-        border: none !important;
-        box-shadow: none !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        width: 100% !important;
-    }
-    .printable-table-card {
-        display: block !important;
-        width: 100% !important;
-    }
-    .asl-table {
-        font-size: 11pt !important;
-        width: 100% !important;
-        border-collapse: collapse !important;
-    }
-    .asl-table th, .asl-table td {
-        border: 1px solid #000 !important;
-        padding: 8px !important;
+    salvaEDisegnaPasti();
+}
+
+function cambiaObiettivoAcqua(valore) {
+    obiettivoAcqua = parseInt(valore);
+    localStorage.setItem('nutri_obiettivo_acqua', obiettivoAcqua);
+    renderWaterTracker();
+}
+
+function registraAcqua(n) {
+    bicchieriAcqua = n;
+    registroGiornaliero[dataSelezionata].acqua = bicchieriAcqua;
+    salvaRegistroGiornaliero();
+    renderWaterTracker();
+}
+
+function aggiungiBicchiereExtra() {
+    bicchieriAcqua++;
+    registroGiornaliero[dataSelezionata].acqua = bicchieriAcqua;
+    salvaRegistroGiornaliero();
+    renderWaterTracker();
+}
+
+function renderWaterTracker() {
+    const textEl = document.getElementById('water-text');
+    if(textEl) textEl.innerText = `${bicchieriAcqua} / ${obiettivoAcqua} bicchieri`;
+    const container = document.getElementById('water-container');
+    if(!container) return;
+    container.innerHTML = '';
+
+    for (let i = 1; i <= Math.max(obiettivoAcqua, bicchieriAcqua); i++) {
+        const filled = i <= bicchieriAcqua ? 'filled' : '';
+        container.innerHTML += `<button class="glass-btn ${filled}" onclick="registraAcqua(${i})">🥛</button>`;
     }
 }
+
+function renderPastiOggi() {
+    const container = document.getElementById('lista-pasti-oggi');
+    if(!container) return;
+    container.innerHTML = '';
+    let pasti = registroGiornaliero[dataSelezionata].pasti;
+
+    for (let [cat, val] of Object.entries(pasti)) {
+        let badgeClass = 'badge-colazione';
+        if (cat.includes('Pranzo')) badgeClass = 'badge-pranzo';
+        if (cat.includes('Cena')) badgeClass = 'badge-cena';
+        if (cat.includes('Spuntino') || cat.includes('Merenda')) badgeClass = 'badge-spuntino';
+
+        container.innerHTML += `
+            <div class="meal-row">
+                <div>
+                    <span class="meal-badge ${badgeClass}">${cat}</span>
+                    <div class="meal-title">${val}</div>
+                </div>
+                <button class="btn btn-secondary btn-sm" onclick="apriEditPasto('${cat}', '${val.replace(/'/g, "\\'")}')">✏️ Modifica</button>
+            </div>
+        `;
+    }
+}
+
+function apriEditPasto(cat, val) {
+    pastoInModifica = cat;
+    document.getElementById('modal-cat-name').innerText = 'Pasto: ' + cat;
+    document.getElementById('modal-pasto-input').value = val;
+    document.getElementById('modal-edit-pasto').classList.add('active');
+}
+
+function salvaModificaPasto() {
+    const nuovoValore = document.getElementById('modal-pasto-input').value.trim();
+    if (nuovoValore !== '') {
+        registroGiornaliero[dataSelezionata].pasti[pastoInModifica] = nuovoValore;
+        salvaEDisegnaPasti();
+        chiudiModale('modal-edit-pasto');
+    }
+}
+
+function salvaEDisegnaPasti() {
+    salvaRegistroGiornaliero();
+    renderPastiOggi();
+    renderDiarioASL();
+}
+
+function chiudiModale(id) {
+    document.getElementById(id).classList.remove('active');
+}
+
+function renderCatalogo() {
+    const container = document.getElementById('lista-catalogo-cibi');
+    if(!container) return;
+    container.innerHTML = '';
+
+    catalogoNutrizionista.forEach((item, index) => {
+        container.innerHTML += `
+            <div class="meal-row">
+                <div>
+                    <span class="meal-badge badge-colazione">${item.cat}</span>
+                    <div class="meal-title">${item.cibo}</div>
+                </div>
+                <button class="btn btn-secondary btn-sm" style="color:#ef4444;" onclick="eliminaCiboCatalogo(${index})">🗑️</button>
+            </div>
+        `;
+    });
+}
+
+function apriModalNuovoCibo() {
+    document.getElementById('modal-nuovo-cibo').classList.add('active');
+}
+
+function salvaNuovoCiboCatalogo() {
+    const cat = document.getElementById('new-cibo-cat').value;
+    const nome = document.getElementById('new-cibo-nome').value.trim();
+
+    if (nome) {
+        catalogoNutrizionista.push({ cat: cat, cibo: nome });
+        localStorage.setItem('nutri_catalogo', JSON.stringify(catalogoNutrizionista));
+        renderCatalogo();
+        document.getElementById('new-cibo-nome').value = '';
+        chiudiModale('modal-nuovo-cibo');
+    }
+}
+
+function eliminaCiboCatalogo(index) {
+    if (confirm("Vuoi rimuovere questo alimento dal tuo catalogo?")) {
+        catalogoNutrizionista.splice(index, 1);
+        localStorage.setItem('nutri_catalogo', JSON.stringify(catalogoNutrizionista));
+        renderCatalogo();
+    }
+}
+
+function renderDiarioASL() {
+    const tbody = document.getElementById('asl-table-body');
+    if(!tbody) return;
+    tbody.innerHTML = '';
+    const giorni = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'];
+
+    giorni.forEach((g) => {
+        let d = new Date();
+        let giornoCorrente = d.getDay() || 7; 
+        let diff = giorni.indexOf(g) + 1 - giornoCorrente;
+        d.setDate(d.getDate() + diff);
+        let dataIso = d.toISOString().split('T')[0];
+
+        let pastiGiorno = registroGiornaliero[dataIso]?.pasti || {
+            'Colazione': catalogoNutrizionista.find(c => c.cat === 'Colazione')?.cibo || '-',
+            'Spuntino M.': catalogoNutrizionista.find(c => c.cat === 'Spuntino')?.cibo || '-',
+            'Pranzo': catalogoNutrizionista.find(c => c.cat === 'Pranzo')?.cibo || '-',
+            'Merenda': catalogoNutrizionista.find(c => c.cat === 'Spuntino')?.cibo || '-',
+            'Cena': catalogoNutrizionista.find(c => c.cat === 'Cena')?.cibo || '-'
+        };
+
+        tbody.innerHTML += `
+            <tr>
+                <td><strong>${g}</strong></td>
+                <td>${pastiGiorno['Colazione'] || '-'}</td>
+                <td>${pastiGiorno['Spuntino M.'] || '-'}</td>
+                <td>${pastiGiorno['Pranzo'] || '-'}</td>
+                <td>${pastiInfoMerenda(pastiGiorno)}</td>
+                <td>${pastiGiorno['Cena'] || '-'}</td>
+            </tr>
+        `;
+    });
+}
+
+function pastiInfoMerenda(pasti) {
+    return pasti['Merenda'] || pasti['Spuntino M.'] || '-';
+}
+
+function generaSettimanaAuto() {
+    const tbody = document.getElementById('lista-piano-settimana');
+    if(!tbody) return;
+    tbody.innerHTML = '';
+    const giorni = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'];
+    
+    const chks = document.querySelectorAll('.chk-uni:checked');
+    const giorniUni = Array.from(chks).map(c => c.value);
+
+    const cibiColazione = catalogoNutrizionista.filter(c => c.cat === 'Colazione');
+    const cibiPranzo = catalogoNutrizionista.filter(c => c.cat === 'Pranzo');
+    const cibiCena = catalogoNutrizionista.filter(c => c.cat === 'Cena');
+    const cibiSpuntino = catalogoNutrizionista.filter(c => c.cat === 'Spuntino');
+
+    giorni.forEach((g, idx) => {
+        const isUni = giorniUni.includes(g);
+        
+        let colazioneScelta = cibiColazione.length > 0 ? cibiColazione[idx % cibiColazione.length].cibo : 'Colazione';
+        let spuntinoScelto = cibiSpuntino.length > 0 ? cibiSpuntino[idx % cibiSpuntino.length].cibo : 'Spuntino';
+        let pranzoScelto = '';
+        
+        if (isUni) {
+            let cibiUniList = cibiPranzo.filter(c => c.cibo.toLowerCase().includes('uni') || c.cibo.toLowerCase().includes('panino') || c.cibo.toLowerCase().includes('bresaola'));
+            if (cibiUniList.length > 0) {
+                pranzoScelto = cibiUniList[idx % cibiUniList.length].cibo;
+            } else {
+                pranzoScelto = cibiPranzo.length > 0 ? cibiPranzo[idx % cibiPranzo.length].cibo : 'Pranzo Università';
+            }
+        } else {
+            let cibiCasaList = cibiPranzo.filter(c => !c.cibo.toLowerCase().includes('uni') && !c.cibo.toLowerCase().includes('panino') && !c.cibo.toLowerCase().includes('bresaola'));
+            if (cibiCasaList.length > 0) {
+                pranzoScelto = cibiCasaList[idx % cibiCasaList.length].cibo;
+            } else {
+                pranzoScelto = cibiPranzo.length > 0 ? cibiPranzo[idx % cibiPranzo.length].cibo : 'Pranzo Casa';
+            }
+        }
+
+        let cenaScelta = cibiCena.length > 0 ? cibiCena[idx % cibiCena.length].cibo : 'Cena';
+
+        tbody.innerHTML += `
+            <tr>
+                <td><strong>${g}</strong> ${isUni ? '🎓' : '🏠'}</td>
+                <td>${colazioneScelta}</td>
+                <td>${spuntinoScelto}</td>
+                <td>${pranzoScelto}</td>
+                <td>${spuntinoScelto}</td>
+                <td>${cenaScelta}</td>
+            </tr>
+        `;
+    });
+    alert("Tabella menù generata con successo!");
+}
+
+function stampaMenuFamiglia() { 
+    window.print(); 
+}
+
+function calcolaBMR() {
+    const peso = parseFloat(document.getElementById('input-peso')?.value) || 0;
+    const altezza = parseFloat(document.getElementById('input-altezza')?.value) || 0;
+    const eta = parseInt(document.getElementById('input-eta')?.value) || 0;
+    const bmr = (10 * peso) + (6.25 * altezza) - (5 * eta) - 161;
+    const out = document.getElementById('bmr-output');
+    if(out) out.innerText = Math.round(bmr);
+}
+
+avviaApp();
