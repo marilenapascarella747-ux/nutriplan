@@ -29,8 +29,8 @@
                     <h3 id="display-giorno-nome" style="font-size: 1rem; color: #7c3aed; margin-top: 10px;">Oggi</h3>
                     
                     <div class="btn-row" style="margin-top: 10px;">
-                        <button id="btn-mode-casa" class="btn btn-secondary active" onclick="setModalitaGiorno('Casa')">🏠 Casa</button>
-                        <button id="btn-mode-uni" class="btn btn-secondary" onclick="setModalitaGiorno('Uni')">🎓 Università</button>
+                        <button type="button" id="btn-mode-casa" class="btn btn-secondary active" onclick="setModalitaGiorno('Casa')">🏠 Casa</button>
+                        <button type="button" id="btn-mode-uni" class="btn btn-secondary" onclick="setModalitaGiorno('Uni')">🎓 Università</button>
                     </div>
                 </div>
 
@@ -44,7 +44,7 @@
                     <p id="water-text" style="font-size: 0.85rem; margin-bottom: 8px;">0 / 8 bicchieri</p>
                     <div class="water-grid" id="water-container"></div>
                     <div style="margin-top: 10px; display:flex; gap:8px;">
-                        <button class="btn btn-primary btn-sm" onclick="aggiungiBicchiereExtra()">+ Aggiungi</button>
+                        <button type="button" class="btn btn-primary btn-sm" onclick="aggiungiBicchiereExtra()">+ Aggiungi</button>
                         <select id="water-goal-select" class="form-control" style="width: auto;" onchange="cambiaObiettivoAcqua(this.value)">
                             <option value="6">Ob. 6</option>
                             <option value="8" selected>Ob. 8</option>
@@ -54,13 +54,13 @@
                 </div>
             </section>
 
-            <!-- SCHEDA 2: PIANO & QUIZ UNIVERSITÀ -->
+            <!-- SCHEDA 2: PIANO & QUIZ -->
             <section id="page-piano" class="page">
                 <div class="card no-print">
-                    <h2>📅 Pianificazione & Università</h2>
-                    <p class="subtitle" style="margin-top: 5px;">Seleziona i giorni in cui sei all'Università:</p>
+                    <h2>📅 Pianificazione Settimanale</h2>
+                    <p class="subtitle" style="margin-top: 5px;">Spunta i giorni in cui vai all'Università (pranzo al sacco):</p>
                     
-                    <div style="display: flex; flex-direction: column; gap: 6px; margin: 10px 0; font-size: 0.9rem;">
+                    <div style="display: flex; flex-direction: column; gap: 6px; margin: 10px 0; font-size: 0.9rem;" id="container-chk-uni">
                         <label><input type="checkbox" class="chk-uni" value="Lunedì"> Lunedì in Università</label>
                         <label><input type="checkbox" class="chk-uni" value="Martedì"> Martedì in Università</label>
                         <label><input type="checkbox" class="chk-uni" value="Mercoledì"> Mercoledì in Università</label>
@@ -71,7 +71,7 @@
                     </div>
 
                     <div class="btn-row" style="flex-direction: column; gap: 8px; margin-top: 10px;">
-                        <button type="button" class="btn btn-primary" style="width: 100%;" onclick="generaSettimanaAuto()">✨ Genera automaticamente (con Università)</button>
+                        <button type="button" class="btn btn-primary" style="width: 100%;" onclick="generaSettimanaAuto()">✨ Genera con un click</button>
                         <button type="button" class="btn btn-secondary" style="width: 100%; background-color: #f3e8ff; color: #7c3aed; font-weight: 700;" onclick="avviaQuizMenu()">📝 Crea il tuo menù (Quiz Manuale)</button>
                         <button type="button" class="btn btn-secondary" style="width: 100%;" onclick="stampaMenuFamiglia()">🖨️ Stampa Tabella Menù</button>
                     </div>
@@ -105,7 +105,7 @@
                                 </tr>
                             </thead>
                             <tbody id="lista-piano-settimana">
-                                <tr><td colspan="6" style="text-align:center; color:#6b7280; padding: 15px;">Genera il menù o usa il quiz sopra.</td></tr>
+                                <tr><td colspan="6" style="text-align:center; color:#6b7280; padding: 15px;">Clicca su "Genera con un click" o usa il quiz.</td></tr>
                             </tbody>
                         </table>
                     </div>
