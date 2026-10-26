@@ -1,392 +1,186 @@
-/* =========================================================
-   NUTRIPLAN ASL - LOGICA DEFINITIVA CATALOGO E STAMPA
-   ========================================================= */
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NutriPlan ASL</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
-let dataSelezionata = new Date().toISOString().split('T')[0];
-if(document.getElementById('select-date-picker')) {
-    document.getElementById('select-date-picker').value = dataSelezionata;
-}
+    <div class="app-container">
+        <!-- HEADER -->
+        <header class="app-header">
+            <h1>NutriPlan ASL 🌸💜</h1>
+            <p class="subtitle">Diario alimentare e pianificazione</p>
+        </header>
 
-let bicchieriAcqua = 0;
-let obiettivoAcqua = parseInt(localStorage.getItem('nutri_obiettivo_acqua')) || 8;
-let modalitaGiorno = 'Casa';
-let pastoInModifica = '';
+        <!-- CONTENUTO DELLE SCHEDE -->
+        <main class="main-content">
 
-let registroGiornaliero = JSON.parse(localStorage.getItem('nutri_registro_giorni')) || {};
-
-let catalogoNutrizionista = JSON.parse(localStorage.getItem('nutri_catalogo')) || [
-    { cat: 'Colazione', cibo: 'Yogurt Greco 0% (150g) + Avena (30g) + Noci (10g)' },
-    { cat: 'Colazione', cibo: 'Latte P.S. (200ml) + 3 Fette biscottate integrali' },
-    { cat: 'Pranzo', cibo: 'Riso integrale (70g) + Pollo (120g) + Zucchine' },
-    { cat: 'Pranzo', cibo: 'Panino integrale (80g) con Bresaola (60g) (Pranzo Uni)' },
-    { cat: 'Cena', cibo: 'Orata al forno (180g) + Insalata mista + Pane (40g)' },
-    { cat: 'Cena', cibo: 'Petto di Tacchino ai ferri (150g) + Finocchi' },
-    { cat: 'Spuntino', cibo: 'Mela (150g) + Mandorle (15g)' }
-];
-
-let archivioSettimane = JSON.parse(localStorage.getItem('nutri_archivio')) || [];
-
-function avviaApp() {
-    if(document.getElementById('water-goal-select')) {
-        document.getElementById('water-goal-select').value = obiettivoAcqua;
-    }
-    caricaDataCorrente();
-    renderCatalogo();
-    renderDiarioASL();
-    calcolaBMR();
-    renderArchivio();
-}
-
-function cambiaDataSelezionata(nuovaData) {
-    dataSelezionata = nuovaData;
-    caricaDataCorrente();
-}
-
-function caricaDataCorrente() {
-    const elNome = document.getElementById('display-giorno-nome');
-    if(elNome) {
-        const d = new Date(dataSelezionata + 'T00:00:00');
-        elNome.innerText = d.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'short' });
-    }
-
-    if (!registroGiornaliero[dataSelezionata]) {
-        registroGiornaliero[dataSelezionata] = {
-            pasti: {
-                'Colazione': catalogoNutrizionista.find(c => c.cat === 'Colazione')?.cibo || 'Colazione',
-                'Spuntino M.': catalogoNutrizionista.find(c => c.cat === 'Spuntino')?.cibo || 'Spuntino',
-                'Pranzo': catalogoNutrizionista.find(c => c.cat === 'Pranzo')?.cibo || 'Pranzo',
-                'Merenda': catalogoNutrizionista.find(c => c.cat === 'Spuntino')?.cibo || 'Merenda',
-                'Cena': catalogoNutrizionista.find(c => c.cat === 'Cena')?.cibo || 'Cena'
-            },
-            acqua: 0
-        };
-    }
-
-    bicchieriAcqua = registroGiornaliero[dataSelezionata].acqua || 0;
-    renderPastiOggi();
-    renderWaterTracker();
-    renderDiarioASL();
-}
-
-function salvaRegistroGiornaliero() {
-    localStorage.setItem('nutri_registro_giorni', JSON.stringify(registroGiornaliero));
-}
-
-function cambiaScheda(schedaId, btn) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-    document.getElementById(schedaId).classList.add('active');
-    btn.classList.add('active');
-}
-
-function setModalitaGiorno(luogo) {
-    modalitaGiorno = luogo;
-    const btnCasa = document.getElementById('btn-mode-casa');
-    const btnUni = document.getElementById('btn-mode-uni');
-    if(btnCasa) btnCasa.classList.toggle('active', luogo === 'Casa');
-    if(btnUni) btnUni.classList.toggle('active', luogo === 'Uni');
-
-    let pasti = registroGiornaliero[dataSelezionata].pasti;
-    if (luogo === 'Uni') {
-        let ciboUni = catalogoNutrizionista.find(c => c.cibo.toLowerCase().includes('uni') || c.cibo.toLowerCase().includes('panino') || c.cibo.toLowerCase().includes('bresaola'))?.cibo;
-        pasti['Pranzo'] = ciboUni || 'Panino integrale con bresaola (Pranzo Uni)';
-    } else {
-        let ciboCasa = catalogoNutrizionista.find(c => c.cat === 'Pranzo' && !c.cibo.toLowerCase().includes('uni'))?.cibo;
-        pasti['Pranzo'] = ciboCasa || 'Pranzo a casa';
-    }
-    salvaEDisegnaPasti();
-}
-
-function cambiaObiettivoAcqua(valore) {
-    obiettivoAcqua = parseInt(valore);
-    localStorage.setItem('nutri_obiettivo_acqua', obiettivoAcqua);
-    renderWaterTracker();
-}
-
-function registraAcqua(n) {
-    bicchieriAcqua = n;
-    registroGiornaliero[dataSelezionata].acqua = bicchieriAcqua;
-    salvaRegistroGiornaliero();
-    renderWaterTracker();
-}
-
-function aggiungiBicchiereExtra() {
-    bicchieriAcqua++;
-    registroGiornaliero[dataSelezionata].acqua = bicchieriAcqua;
-    salvaRegistroGiornaliero();
-    renderWaterTracker();
-}
-
-function renderWaterTracker() {
-    const textEl = document.getElementById('water-text');
-    if(textEl) textEl.innerText = `${bicchieriAcqua} / ${obiettivoAcqua} bicchieri`;
-    const container = document.getElementById('water-container');
-    if(!container) return;
-    container.innerHTML = '';
-
-    for (let i = 1; i <= Math.max(obiettivoAcqua, bicchieriAcqua); i++) {
-        const filled = i <= bicchieriAcqua ? 'filled' : '';
-        container.innerHTML += `<button class="glass-btn ${filled}" onclick="registraAcqua(${i})">🥛</button>`;
-    }
-}
-
-function renderPastiOggi() {
-    const container = document.getElementById('lista-pasti-oggi');
-    if(!container) return;
-    container.innerHTML = '';
-    let pasti = registroGiornaliero[dataSelezionata].pasti;
-
-    for (let [cat, val] of Object.entries(pasti)) {
-        let badgeClass = 'badge-colazione';
-        if (cat.includes('Pranzo')) badgeClass = 'badge-pranzo';
-        if (cat.includes('Cena')) badgeClass = 'badge-cena';
-        if (cat.includes('Spuntino') || cat.includes('Merenda')) badgeClass = 'badge-spuntino';
-
-        container.innerHTML += `
-            <div class="meal-row">
-                <div>
-                    <span class="meal-badge ${badgeClass}">${cat}</span>
-                    <div class="meal-title">${val}</div>
+            <!-- SCHEDA 1: OGGI -->
+            <section id="page-oggi" class="page active">
+                <div class="card">
+                    <h2>📅 Gestione Giornaliera</h2>
+                    <div style="margin: 10px 0;">
+                        <label for="select-date-picker" style="font-size: 0.85rem; font-weight: 500;">Seleziona Data:</label>
+                        <input type="date" id="select-date-picker" class="form-control" onchange="cambiaDataSelezionata(this.value)" style="margin-top: 4px;">
+                    </div>
+                    <h3 id="display-giorno-nome" style="font-size: 1rem; color: #7c3aed; margin-top: 10px;">Oggi</h3>
+                    
+                    <div class="btn-row" style="margin-top: 10px;">
+                        <button id="btn-mode-casa" class="btn btn-secondary active" onclick="setModalitaGiorno('Casa')">🏠 Casa</button>
+                        <button id="btn-mode-uni" class="btn btn-secondary" onclick="setModalitaGiorno('Uni')">🎓 Università</button>
+                    </div>
                 </div>
-                <button class="btn btn-secondary btn-sm" onclick="apriEditPasto('${cat}', '${val.replace(/'/g, "\\'")}')">✏️ Modifica</button>
-            </div>
-        `;
-    }
-}
 
-function apriEditPasto(cat, val) {
-    pastoInModifica = cat;
-    document.getElementById('modal-cat-name').innerText = 'Pasto: ' + cat;
-    document.getElementById('modal-pasto-input').value = val;
-    document.getElementById('modal-edit-pasto').classList.add('active');
-}
-
-function salvaModificaPasto() {
-    const nuovoValore = document.getElementById('modal-pasto-input').value.trim();
-    if (nuovoValore !== '') {
-        registroGiornaliero[dataSelezionata].pasti[pastoInModifica] = nuovoValore;
-        salvaEDisegnaPasti();
-        chiudiModale('modal-edit-pasto');
-    }
-}
-
-function salvaEDisegnaPasti() {
-    salvaRegistroGiornaliero();
-    renderPastiOggi();
-    renderDiarioASL();
-}
-
-function chiudiModale(id) {
-    document.getElementById(id).classList.remove('active');
-}
-
-function renderCatalogo() {
-    const container = document.getElementById('lista-catalogo-cibi');
-    if(!container) return;
-    container.innerHTML = '';
-
-    catalogoNutrizionista.forEach((item, index) => {
-        container.innerHTML += `
-            <div class="meal-row">
-                <div>
-                    <span class="meal-badge badge-colazione">${item.cat}</span>
-                    <div class="meal-title">${item.cibo}</div>
+                <div class="card">
+                    <h3>🍽️ Pasti di Oggi</h3>
+                    <div id="lista-pasti-oggi" style="margin-top: 10px;"></div>
                 </div>
-                <button class="btn btn-secondary btn-sm" style="color:#ef4444;" onclick="eliminaCiboCatalogo(${index})">🗑️</button>
-            </div>
-        `;
-    });
-}
 
-function apriModalNuovoCibo() {
-    document.getElementById('modal-nuovo-cibo').classList.add('active');
-}
+                <div class="card">
+                    <h3>🥛 Acqua</h3>
+                    <p id="water-text" style="font-size: 0.85rem; margin-bottom: 8px;">0 / 8 bicchieri</p>
+                    <div class="water-grid" id="water-container"></div>
+                    <div style="margin-top: 10px; display:flex; gap:8px;">
+                        <button class="btn btn-primary btn-sm" onclick="aggiungiBicchiereExtra()">+ Aggiungi</button>
+                        <select id="water-goal-select" class="form-control" style="width: auto;" onchange="cambiaObiettivoAcqua(this.value)">
+                            <option value="6">Ob. 6</option>
+                            <option value="8" selected>Ob. 8</option>
+                            <option value="10">Ob. 10</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
 
-function salvaNuovoCiboCatalogo() {
-    const cat = document.getElementById('new-cibo-cat').value;
-    const nome = document.getElementById('new-cibo-nome').value.trim();
+            <!-- SCHEDA 2: PIANO & QUIZ UNIVERSITÀ -->
+            <section id="page-piano" class="page">
+                <div class="card">
+                    <h2>📅 Piano & Quiz Università</h2>
+                    <p class="subtitle" style="margin-top: 5px;">Seleziona i giorni in cui sei all'Università:</p>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 6px; margin: 12px 0; font-size: 0.9rem;">
+                        <label><input type="checkbox" class="chk-uni" value="Lunedì"> Lunedì in Università</label>
+                        <label><input type="checkbox" class="chk-uni" value="Martedì"> Martedì in Università</label>
+                        <label><input type="checkbox" class="chk-uni" value="Mercoledì"> Mercoledì in Università</label>
+                        <label><input type="checkbox" class="chk-uni" value="Giovedì"> Giovedì in Università</label>
+                        <label><input type="checkbox" class="chk-uni" value="Venerdì"> Venerdì in Università</label>
+                        <label><input type="checkbox" class="chk-uni" value="Sabato"> Sabato in Università</label>
+                        <label><input type="checkbox" class="chk-uni" value="Domenica"> Domenica in Università</label>
+                    </div>
 
-    if (nome) {
-        catalogoNutrizionista.push({ cat: cat, cibo: nome });
-        localStorage.setItem('nutri_catalogo', JSON.stringify(catalogoNutrizionista));
-        renderCatalogo();
-        document.getElementById('new-cibo-nome').value = '';
-        chiudiModale('modal-nuovo-cibo');
-    }
-}
+                    <div class="btn-row">
+                        <button class="btn btn-primary" onclick="generaSettimanaAuto()">✨ Genera Menù</button>
+                        <button class="btn btn-secondary" onclick="stampaMenuFamiglia()">🖨️ Stampa Menù</button>
+                    </div>
+                </div>
 
-function eliminaCiboCatalogo(index) {
-    if (confirm("Vuoi rimuovere questo alimento dal tuo catalogo?")) {
-        catalogoNutrizionista.splice(index, 1);
-        localStorage.setItem('nutri_catalogo', JSON.stringify(catalogoNutrizionista));
-        renderCatalogo();
-    }
-}
+                <div class="card">
+                    <h3>📋 Anteprima Piano</h3>
+                    <div id="lista-piano-settimana" style="margin-top: 10px;">
+                        <p class="subtitle">Genera il menù per visualizzarlo qui.</p>
+                    </div>
+                </div>
+            </section>
 
-function renderDiarioASL() {
-    const tbody = document.getElementById('asl-table-body');
-    if(!tbody) return;
-    tbody.innerHTML = '';
-    const giorni = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'];
-    let pasti = registroGiornaliero[dataSelezionata].pasti;
+            <!-- SCHEDA 3: DIETA / CATALOGO -->
+            <section id="page-dieta" class="page">
+                <div class="card">
+                    <h2>🥗 Catalogo Cibi</h2>
+                    <p class="subtitle" style="margin-top: 5px;">I tuoi alimenti inseriti per popolare i pasti.</p>
+                    <button class="btn btn-primary" style="margin-top: 12px;" onclick="apriModalNuovoCibo()">+ Aggiungi Alimento</button>
+                </div>
+                <div class="card">
+                    <h3>Alimenti Disponibili</h3>
+                    <div id="lista-catalogo-cibi" style="margin-top: 10px;"></div>
+                </div>
+            </section>
 
-    giorni.forEach(g => {
-        tbody.innerHTML += `
-            <tr>
-                <td><strong>${g}</strong></td>
-                <td>${pasti['Colazione'] || '-'}</td>
-                <td>${pasti['Spuntino M.'] || '-'}</td>
-                <td>${pasti['Pranzo'] || '-'}</td>
-                <td>${pasti['Merenda'] || '-'}</td>
-                <td>${pasti['Cena'] || '-'}</td>
-            </tr>
-        `;
-    });
-}
+            <!-- SCHEDA 4: ASL -->
+            <section id="page-asl" class="page">
+                <div class="card">
+                    <h2>📄 Foglio ASL</h2>
+                    <p class="subtitle" style="margin-top: 5px;">Carica il modello del tuo foglio:</p>
+                    <input type="file" accept="image/*,application/pdf" class="form-control" style="margin-top: 10px;" onchange="caricaFoglioASL(event)">
+                </div>
+                
+                <div class="card asl-preview-card">
+                    <h3>Diario ASL</h3>
+                    <div class="asl-container" style="position: relative; margin-top: 10px; overflow-x: auto;">
+                        <img id="asl-background-img" style="display:none; width: 100%; border-radius: 8px;" alt="Sfondo ASL">
+                        <table class="asl-table" style="width: 100%; font-size: 0.75rem; margin-top: 10px;">
+                            <thead>
+                                <tr style="background: #fdf2f8; color: #db2777;">
+                                    <th>Giorno</th>
+                                    <th>Colazione</th>
+                                    <th>Spuntino</th>
+                                    <th>Pranzo</th>
+                                    <th>Merenda</th>
+                                    <th>Cena</th>
+                                </tr>
+                            </thead>
+                            <tbody id="asl-table-body"></tbody>
+                        </table>
+                    </div>
+                    <button class="btn btn-primary" style="margin-top: 15px;" onclick="window.print()">Stampa Foglio ASL</button>
+                </div>
+            </section>
 
-function caricaFoglioASL(event) {
-    const file = event.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const imgData = e.target.result;
-            const imgElement = document.getElementById('asl-background-img');
-            if(imgElement) {
-                imgElement.src = imgData;
-                imgElement.style.display = 'block';
-            }
-            localStorage.setItem('nutri_foglio_asl_bg', imgData);
-            alert("Foglio caricato con successo!");
-        };
-        reader.readAsDataURL(file);
-    }
-}
+            <!-- SCHEDA 5: PROFILO -->
+            <section id="page-profilo" class="page">
+                <div class="card">
+                    <h2>⚙️ Profilo & BMR</h2>
+                    <div style="display:flex; flex-direction:column; gap:8px; margin-top:10px;">
+                        <input type="number" id="input-peso" class="form-control" placeholder="Peso (kg)" oninput="calcolaBMR()">
+                        <input type="number" id="input-altezza" class="form-control" placeholder="Altezza (cm)" oninput="calcolaBMR()">
+                        <input type="number" id="input-eta" class="form-control" placeholder="Età" oninput="calcolaBMR()">
+                    </div>
+                    <p style="margin-top: 10px; font-size: 0.85rem;">BMR Calcolato: <strong id="bmr-output">--</strong> kcal</p>
+                </div>
+            </section>
 
-/* GENERAZIONE SETTIMANA VARIATA DAL CATALOGO (GIORNO PER GIORNO) */
-function generaSettimanaAuto() {
-    const container = document.getElementById('lista-piano-settimana');
-    if(!container) return;
-    container.innerHTML = '';
-    const giorni = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'];
-    
-    const chks = document.querySelectorAll('.chk-uni:checked');
-    const giorniUni = Array.from(chks).map(c => c.value);
+        </main>
 
-    // Filtriamo dal TUO catalogo reale
-    const cibiColazione = catalogoNutrizionista.filter(c => c.cat === 'Colazione');
-    const cibiPranzo = catalogoNutrizionista.filter(c => c.cat === 'Pranzo');
-    const cibiCena = catalogoNutrizionista.filter(c => c.cat === 'Cena');
-    const cibiSpuntino = catalogoNutrizionista.filter(c => c.cat === 'Spuntino');
-
-    giorni.forEach((g, idx) => {
-        const isUni = giorniUni.includes(g);
-        
-        // Rotazione intelligente: prende i cibi diversi che hai inserito tu in sequenza (idx % lunghezza)
-        let colazioneScelta = cibiColazione.length > 0 ? cibiColazione[idx % cibiColazione.length].cibo : 'Colazione';
-        let spuntinoScelto = cibiSpuntino.length > 0 ? cibiSpuntino[idx % cibiSpuntino.length].cibo : 'Spuntino';
-        let pranzoScelto = '';
-        
-        if (isUni) {
-            let cibiUniList = cibiPranzo.filter(c => c.cibo.toLowerCase().includes('uni') || c.cibo.toLowerCase().includes('panino') || c.cibo.toLowerCase().includes('bresaola'));
-            if (cibiUniList.length > 0) {
-                pranzoScelto = cibiUniList[idx % cibiUniList.length].cibo;
-            } else {
-                pranzoScelto = cibiPranzo.length > 0 ? cibiPranzo[idx % cibiPranzo.length].cibo : 'Pranzo Università';
-            }
-        } else {
-            let cibiCasaList = cibiPranzo.filter(c => !c.cibo.toLowerCase().includes('uni') && !c.cibo.toLowerCase().includes('panino') && !c.cibo.toLowerCase().includes('bresaola'));
-            if (cibiCasaList.length > 0) {
-                pranzoScelto = cibiCasaList[idx % cibiCasaList.length].cibo;
-            } else {
-                pranzoScelto = cibiPranzo.length > 0 ? cibiPranzo[idx % cibiPranzo.length].cibo : 'Pranzo Casa';
-            }
-        }
-
-        let cenaScelta = cibiCena.length > 0 ? cibiCena[idx % cibiCena.length].cibo : 'Cena';
-
-        container.innerHTML += `
-            <div class="meal-row" style="margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 8px;">
-                <div>
-                    <strong>${g} ${isUni ? '🎓 (Università)' : '🏠 (Casa)'}:</strong><br>
-                    ☕ <strong>Colazione:</strong> ${colazioneScelta}<br>
-                    🍏 <strong>Spuntino:</strong> ${spuntinoScelto}<br>
-                    🍝 <strong>Pranzo:</strong> ${pranzoScelto}<br>
-                    🐟 <strong>Cena:</strong> ${cenaScelta}
+        <!-- MODALI -->
+        <div id="modal-edit-pasto" class="modal">
+            <div class="modal-content">
+                <h3 id="modal-cat-name">Modifica Pasto</h3>
+                <input type="text" id="modal-pasto-input" class="form-control" style="margin: 10px 0;">
+                <div class="btn-row">
+                    <button class="btn btn-primary" onclick="salvaModificaPasto()">Salva</button>
+                    <button class="btn btn-secondary" onclick="chiudiModale('modal-edit-pasto')">Annulla</button>
                 </div>
             </div>
-        `;
-    });
-    alert("Menù generato variando i tuoi cibi personalizzati per ogni giorno!");
-}
-
-function stampaMenuFamiglia() { 
-    window.print(); 
-}
-
-function calcolaBMR() {
-    const peso = parseFloat(document.getElementById('input-peso')?.value) || 0;
-    const altezza = parseFloat(document.getElementById('input-altezza')?.value) || 0;
-    const eta = parseInt(document.getElementById('input-eta')?.value) || 0;
-    const bmr = (10 * peso) + (6.25 * altezza) - (5 * eta) - 161;
-    const out = document.getElementById('bmr-output');
-    if(out) out.innerText = Math.round(bmr);
-}
-
-function salvaProfilo() {
-    const email = document.getElementById('input-email')?.value || '';
-    localStorage.setItem('nutri_user_email', email);
-}
-
-function renderArchivio() {
-    const container = document.getElementById('lista-archivio-settimane');
-    if(!container) return;
-    container.innerHTML = '';
-
-    if (archivioSettimane.length === 0) {
-        container.innerHTML = '<p class="subtitle">Nessuna settimana salvata finora.</p>';
-        return;
-    }
-
-    archivioSettimane.forEach((sett, idx) => {
-        container.innerHTML += `
-            <div class="meal-row">
-                <div>
-                    <strong>Domenica ${sett.data}:</strong> Diario ASL & Menù Famiglia
-                </div>
-            </div>
-        `;
-    });
-}
-
-function apriRitualeDomenica() {
-    const modalContent = document.getElementById('rituale-step-content');
-    if(!modalContent) return;
-    modalContent.innerHTML = `
-        <p class="subtitle"><strong>Fase 1: Controllo Pasti Mancanti</strong></p>
-        <p style="font-size:0.85rem; margin-top:8px;">Hai registrato tutti i pasti di questa settimana per il foglio ASL?</p>
-        <div class="btn-row" style="margin-top:14px;">
-            <button class="btn btn-primary" onclick="concludiRitualeStep2()">Sì, Tutto Registrato</button>
-            <button class="btn btn-secondary" onclick="chiudiModale('modal-rituale')">Fammi Controllare</button>
         </div>
-    `;
-    document.getElementById('modal-rituale').classList.add('active');
-}
 
-function concludiRitualeStep2() {
-    const dataStr = new Date().toLocaleDateString('it-IT');
-    archivioSettimane.unshift({ data: dataStr });
-    localStorage.setItem('nutri_archivio', JSON.stringify(archivioSettimane));
-    renderArchivio();
-
-    const modalContent = document.getElementById('rituale-step-content');
-    if(!modalContent) return;
-    modalContent.innerHTML = `
-        <p class="subtitle"><strong>Fase 2: Salvataggio & Nuova Settimana</strong></p>
-        <p style="font-size:0.85rem; margin-top:8px;">✅ Settimana salvata in Archivio!</p>
-        <div class="btn-row" style="margin-top:14px;">
-            <button class="btn btn-primary" onclick="chiudiModale('modal-rituale'); window.print();">📋 Stampa Menù</button>
+        <div id="modal-nuovo-cibo" class="modal">
+            <div class="modal-content">
+                <h3>Aggiungi al Catalogo</h3>
+                <select id="new-cibo-cat" class="form-control" style="margin: 10px 0;">
+                    <option value="Colazione">Colazione</option>
+                    <option value="Spuntino">Spuntino</option>
+                    <option value="Pranzo">Pranzo</option>
+                    <option value="Cena">Cena</option>
+                </select>
+                <input type="text" id="new-cibo-nome" class="form-control" placeholder="Descrizione alimento e grammi" style="margin-bottom: 10px;">
+                <div class="btn-row">
+                    <button class="btn btn-primary" onclick="salvaNuovoCiboCatalogo()">Aggiungi</button>
+                    <button class="btn btn-secondary" onclick="chiudiModale('modal-nuovo-cibo')">Annulla</button>
+                </div>
+            </div>
         </div>
-    `;
-}
 
-avviaApp();
+        <!-- NAVIGAZIONE INFERIORE -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" onclick="cambiaScheda('page-oggi', this)">📅 Oggi</button>
+            <button class="nav-item" onclick="cambiaScheda('page-piano', this)">✨ Piano</button>
+            <button class="nav-item" onclick="cambiaScheda('page-dieta', this)">🥗 Dieta</button>
+            <button class="nav-item" onclick="cambiaScheda('page-asl', this)">📄 ASL</button>
+            <button class="nav-item" onclick="cambiaScheda('page-profilo', this)">⚙️ Profilo</button>
+        </nav>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
