@@ -56,8 +56,8 @@
 
             <!-- SCHEDA 2: PIANO & QUIZ UNIVERSITÀ -->
             <section id="page-piano" class="page">
-                <div class="card">
-                    <h2>📅 Quiz & Menù Settimanale</h2>
+                <div class="card no-print">
+                    <h2>📅 Quiz Università</h2>
                     <p class="subtitle" style="margin-top: 5px;">Seleziona i giorni in cui sei all'Università:</p>
                     
                     <div style="display: flex; flex-direction: column; gap: 6px; margin: 12px 0; font-size: 0.9rem;">
@@ -76,10 +76,10 @@
                     </div>
                 </div>
 
-                <div class="card">
-                    <h3>📋 Tabella Menù Settimanale</h3>
-                    <div class="asl-container" style="position: relative; margin-top: 10px; overflow-x: auto;">
-                        <table class="asl-table" style="width: 100%; font-size: 0.75rem;">
+                <div class="card printable-table-card">
+                    <h3 style="margin-bottom: 8px; color: var(--accent);">📋 Tabella Menù della Settimana</h3>
+                    <div class="asl-container" style="position: relative; overflow-x: auto;">
+                        <table class="asl-table" style="width: 100%; font-size: 0.85rem;">
                             <thead>
                                 <tr style="background: #fdf2f8; color: #db2777;">
                                     <th>Giorno</th>
@@ -91,10 +91,11 @@
                                 </tr>
                             </thead>
                             <tbody id="lista-piano-settimana">
-                                <tr><td colspan="6" style="text-align:center; color:#6b7280;">Clicca su "Genera Tabella Menù" sopra.</td></tr>
+                                <tr><td colspan="6" style="text-align:center; color:#6b7280; padding: 15px;">Clicca su "Genera Tabella Menù" per compilarla.</td></tr>
                             </tbody>
                         </table>
                     </div>
+                    <button class="btn btn-primary no-print" style="margin-top: 15px; width: 100%;" onclick="window.print()">🖨️ Stampa Tabella</button>
                 </div>
             </section>
 
@@ -123,7 +124,7 @@
                     <h3>Diario ASL</h3>
                     <div class="asl-container" style="position: relative; margin-top: 10px; overflow-x: auto;">
                         <img id="asl-background-img" style="display:none; width: 100%; border-radius: 8px;" alt="Sfondo ASL">
-                        <table class="asl-table" style="width: 100%; font-size: 0.75rem; margin-top: 10px;">
+                        <table class="asl-table" style="width: 100%; font-size: 0.85rem; margin-top: 10px;">
                             <thead>
                                 <tr style="background: #fdf2f8; color: #db2777;">
                                     <th>Giorno</th>
