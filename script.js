@@ -1,5 +1,5 @@
 /* =========================================================
-   NUTRIPLAN ASL - SCRIPT PULITO E DEFINITIVO
+   NUTRIPLAN ASL - LOGICA JAVASCRIPT VERTICALE E PULITA
    ========================================================= */
 
 let dataSelezionata = new Date().toISOString().split('T')[0];
