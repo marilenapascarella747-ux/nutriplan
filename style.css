@@ -270,11 +270,8 @@ body {
     vertical-align: top;
 }
 
-/* =========================================================
-   REGOLE DI STAMPA CORRETTE (PER STAMPARE IL MENÙ E L'ASL)
-   ========================================================= */
 @media print {
-    .bottom-nav, .app-header, .btn, button, input[type="file"], .modal {
+    .bottom-nav, .app-header, .btn, button, input[type="file"], .modal, .no-print {
         display: none !important;
     }
     body, .app-container, .main-content {
@@ -297,7 +294,20 @@ body {
         border: none !important;
         box-shadow: none !important;
         padding: 0 !important;
-        margin-bottom: 15px !important;
+        margin: 0 !important;
         width: 100% !important;
+    }
+    .printable-table-card {
+        display: block !important;
+        width: 100% !important;
+    }
+    .asl-table {
+        font-size: 11pt !important;
+        width: 100% !important;
+        border-collapse: collapse !important;
+    }
+    .asl-table th, .asl-table td {
+        border: 1px solid #000 !important;
+        padding: 8px !important;
     }
 }
