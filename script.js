@@ -1,5 +1,5 @@
 /* =========================================================
-   NUTRIPLAN ASL - SCRIPT DEFINITIVO
+   NUTRIPLAN ASL - SCRIPT DEFINITIVO TABELLA VISIBILE
    ========================================================= */
 
 let dataSelezionata = new Date().toISOString().split('T')[0];
@@ -36,8 +36,15 @@ function avviaApp() {
     }
     caricaDataCorrente();
     renderCatalogo();
-    renderDiarioASL();
-    renderTabellaPianoSalvata();
+
+    // Se è la prima volta e non c'è un menù salvato, genera un menù di default così la tabella si vede subito!
+    if (Object.keys(window.menuAslSalvato).length === 0) {
+        generaSettimanaAutoSilenzioso();
+    } else {
+        renderTabellaPianoSalvata();
+        renderDiarioASL();
+    }
+
     renderArchivio();
     calcolaBMR();
 }
@@ -227,7 +234,7 @@ function eliminaCiboCatalogo(index) {
     }
 }
 
-/* DIARIO ASL SINCRONIZZATO */
+/* DIARIO ASL E TABELLA PIANO VISIBILI */
 function renderDiarioASL() {
     const tbody = document.getElementById('asl-table-body');
     if(!tbody) return;
@@ -254,8 +261,13 @@ function renderDiarioASL() {
 
 function renderTabellaPianoSalvata() {
     const tbody = document.getElementById('lista-piano-settimana');
-    if(!tbody || Object.keys(window.menuAslSalvato).length === 0) return;
+    if(!tbody) return;
     tbody.innerHTML = '';
+
+    if (Object.keys(window.menuAslSalvato).length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#6b7280; padding: 15px;">Genera il menù o usa il quiz sopra.</td></tr>`;
+        return;
+    }
 
     giorniQuizList.forEach(g => {
         let dati = window.menuAslSalvato[g];
@@ -292,7 +304,7 @@ function caricaFoglioASL(event) {
     }
 }
 
-/* RITUALE DELLA DOMENICA (CONTROLLO GIORNI VUOTI & ARCHIVIO) */
+/* RITUALE DELLA DOMENICA */
 function avviaRitualeDomenica() {
     const modalContent = document.getElementById('rituale-step-content');
     if(!modalContent) return;
@@ -355,12 +367,8 @@ function renderArchivio() {
     });
 }
 
-/* GENERAZIONE AUTOMATICA CON UNIVERSITÀ (FORZATA E FUNZIONANTE) */
-function generaSettimanaAuto() {
-    const tbody = document.getElementById('lista-piano-settimana');
-    if(!tbody) return;
-    tbody.innerHTML = '';
-    
+/* GENERAZIONE SILENZIOSA INIZIALE */
+function generaSettimanaAutoSilenzioso() {
     const chks = document.querySelectorAll('.chk-uni:checked');
     const giorniUni = Array.from(chks).map(c => c.value);
 
@@ -373,20 +381,11 @@ function generaSettimanaAuto() {
 
     giorniQuizList.forEach((g, idx) => {
         const isUni = giorniUni.includes(g);
-        
         let colazioneScelta = cibiColazione.length > 0 ? cibiColazione[idx % cibiColazione.length].cibo : 'Colazione';
         let spuntinoScelto = cibiSpuntino.length > 0 ? cibiSpuntino[idx % cibiSpuntino.length].cibo : 'Spuntino';
         let merendaScelta = cibiSpuntino.length > 1 ? cibiSpuntino[(idx + 1) % cibiSpuntino.length].cibo : spuntinoScelto;
         let cenaScelta = cibiCena.length > 0 ? cibiCena[idx % cibiCena.length].cibo : 'Cena';
-        let pranzoScelta = '';
-
-        if (isUni) {
-            let cibiUniList = cibiPranzo.filter(c => c.cibo.toLowerCase().includes('uni') || c.cibo.toLowerCase().includes('panino') || c.cibo.toLowerCase().includes('bresaola'));
-            pranzoScelta = cibiUniList.length > 0 ? cibiUniList[idx % cibiUniList.length].cibo : 'Panino Università';
-        } else {
-            let cibiCasaList = cibiPranzo.filter(c => !c.cibo.toLowerCase().includes('uni') && !c.cibo.toLowerCase().includes('panino'));
-            pranzoScelta = cibiCasaList.length > 0 ? cibiCasaList[idx % cibiCasaList.length].cibo : 'Pranzo Casa';
-        }
+        let pranzoScelta = cibiPranzo.length > 0 ? cibiPranzo[idx % cibiPranzo.length].cibo : 'Pranzo';
 
         window.menuAslSalvato[g] = {
             'Colazione': colazioneScelta,
@@ -395,21 +394,16 @@ function generaSettimanaAuto() {
             'Merenda': merendaScelta,
             'Cena': cenaScelta
         };
-
-        tbody.innerHTML += `
-            <tr>
-                <td><strong>${g}</strong> ${isUni ? '🎓' : '🏠'}</td>
-                <td>${colazioneScelta}</td>
-                <td>${spuntinoScelto}</td>
-                <td>${pranzoScelto}</td>
-                <td>${merendaScelta}</td>
-                <td>${cenaScelta}</td>
-            </tr>
-        `;
     });
 
     localStorage.setItem('nutri_menu_asl', JSON.stringify(window.menuAslSalvato));
+    renderTabellaPianoSalvata();
     renderDiarioASL();
+}
+
+/* GENERAZIONE AUTOMATICA DA PULSANTE */
+function generaSettimanaAuto() {
+    generaSettimanaAutoSilenzioso();
     alert("Menù generato con successo e sincronizzato con l'ASL!");
 }
 
@@ -492,29 +486,9 @@ function proseguiQuizMenu() {
 }
 
 function componiTabellaDaQuiz() {
-    const tbody = document.getElementById('lista-piano-settimana');
-    if(!tbody) return;
-    tbody.innerHTML = '';
-
     window.menuAslSalvato = menuQuizTemporaneo;
-
-    giorniQuizList.forEach(g => {
-        let dati = window.menuAslSalvato[g];
-        if(!dati) return;
-
-        tbody.innerHTML += `
-            <tr>
-                <td><strong>${g}</strong></td>
-                <td>${dati['Colazione']}</td>
-                <td>${dati['Spuntino M.']}</td>
-                <td>${dati['Pranzo']}</td>
-                <td>${dati['Merenda']}</td>
-                <td>${dati['Cena']}</td>
-            </tr>
-        `;
-    });
-
     localStorage.setItem('nutri_menu_asl', JSON.stringify(window.menuAslSalvato));
+    renderTabellaPianoSalvata();
     renderDiarioASL();
 }
 
