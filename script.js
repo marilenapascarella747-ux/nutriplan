@@ -1,5 +1,5 @@
 /* =========================================================
-   NUTRIPLAN ASL - SCRIPT PULITO E FUNZIONANTE
+   NUTRIPLAN ASL - SCRIPT DEFINITIVO CON SINCRONIZZAZIONE GIORNALIERA
    ========================================================= */
 
 let dataSelezionata = new Date().toISOString().split('T')[0];
@@ -183,7 +183,7 @@ function salvaModificaPasto() {
 function salvaEDisegnaPasti() {
     salvaRegistroGiornaliero();
     renderPastiOggi();
-    renderDiarioASL();
+    renderDiarioASL(); // Aggiorna subito anche il diario ASL con la modifica fatta in "Oggi"
 }
 
 function chiudiModale(id) {
@@ -233,7 +233,7 @@ function eliminaCiboCatalogo(index) {
     }
 }
 
-/* DIARIO ASL E TABELLA PIANO */
+/* DIARIO ASL CHE PRENDE LA PRIORITÀ DALLE MODIFICHE FATTE IN "OGGI" */
 function renderDiarioASL() {
     const tbody = document.getElementById('asl-table-body');
     if(!tbody) return;
@@ -241,15 +241,28 @@ function renderDiarioASL() {
     const giorni = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'];
 
     giorni.forEach((g) => {
-        let pastiGiorno = window.menuAslSalvato[g] || {
-            'Colazione': '-', 'Spuntino M.': '-', 'Pranzo': '-', 'Merenda': '-', 'Cena': '-'
-        };
+        // Calcola la data esatta della settimana corrente per quel giorno
+        let d = new Date();
+        let giornoCorrente = d.getDay() || 7; 
+        let diff = giorni.indexOf(g) + 1 - giornoCorrente;
+        d.setDate(d.getDate() + diff);
+        let dataIso = d.toISOString().split('T')[0];
+
+        // 1. Controlla se c'è una modifica diretta fatta nella scheda "Oggi" per quella specifica data
+        let pastiGiorno = registroGiornaliero[dataIso]?.pasti;
+
+        // 2. Se non ci sono modifiche in "Oggi", prende il menù settimanale generato
+        if (!pastiGiorno) {
+            pastiGiorno = window.menuAslSalvato[g] || {
+                'Colazione': '-', 'Spuntino M.': '-', 'Pranzo': '-', 'Merenda': '-', 'Cena': '-'
+            };
+        }
 
         tbody.innerHTML += `
             <tr>
                 <td><strong>${g}</strong></td>
                 <td>${pastiGiorno['Colazione'] || '-'}</td>
-                <td>${pastiGiorno['Spuntino M.'] || '-'}</td>
+                <td>${pastiGiorno['Spuntino M.'] || pastiGiorno['Spuntino'] || '-'}</td>
                 <td>${pastiGiorno['Pranzo'] || '-'}</td>
                 <td>${pastiGiorno['Merenda'] || '-'}</td>
                 <td>${pastiGiorno['Cena'] || '-'}</td>
@@ -366,7 +379,7 @@ function renderArchivio() {
     });
 }
 
-/* GENERAZIONE AUTOMATICA (PRENDE DALLA DIETA E GESTISCE IL PRANZO A SACCO PER UNIVERSITÀ) */
+/* GENERAZIONE AUTOMATICA CON UN CLICK */
 function generaSettimanaAutoSilenzioso() {
     const chks = document.querySelectorAll('.chk-uni:checked');
     const giorniUni = Array.from(chks).map(c => c.value);
@@ -388,11 +401,9 @@ function generaSettimanaAutoSilenzioso() {
         let pranzoScelta = '';
 
         if (isUni) {
-            // Se va all'università, cerca un pasto al sacco/panino dal catalogo
             let cibiUniList = cibiPranzo.filter(c => c.cibo.toLowerCase().includes('panino') || c.cibo.toLowerCase().includes('bresaola') || c.cibo.toLowerCase().includes('sacco'));
             pranzoScelta = cibiUniList.length > 0 ? cibiUniList[idx % cibiUniList.length].cibo : (cibiPranzo.length > 0 ? cibiPranzo[0].cibo : 'Pranzo al sacco');
         } else {
-            // Pranzo normale da catalogo
             let cibiCasaList = cibiPranzo.filter(c => !c.cibo.toLowerCase().includes('panino') && !c.cibo.toLowerCase().includes('bresaola'));
             pranzoScelta = cibiCasaList.length > 0 ? cibiCasaList[idx % cibiCasaList.length].cibo : (cibiPranzo.length > 0 ? cibiPranzo[idx % cibiPranzo.length].cibo : 'Pranzo');
         }
@@ -413,7 +424,7 @@ function generaSettimanaAutoSilenzioso() {
 
 function generaSettimanaAuto() {
     generaSettimanaAutoSilenzioso();
-    alert("Menù generato con un click! I giorni in Università hanno il pranzo al sacco preso dalla tua dieta.");
+    alert("Menù generato con un click! I giorni in Università hanno il pranzo al sacco e tutto è sincronizzato.");
 }
 
 /* QUIZ MANUALE (CREA IL TUO MENÙ) */
