@@ -1,5 +1,5 @@
 /* =========================================================
-   NUTRIPLAN ASL - LOGICA GENERAZIONE MENÙ VARIATA
+   NUTRIPLAN ASL - LOGICA COMPLETA CON OPZIONI E QUIZ GIORNI UNI
    ========================================================= */
 
 let dataSelezionata = new Date().toISOString().split('T')[0];
@@ -248,12 +248,13 @@ function caricaFoglioASL(event) {
     }
 }
 
-/* GENERAZIONE PIANO VARIATO DAL CATALOGO */
+/* GENERAZIONE GUIDATA TRAMITE QUIZ GIORNI UNI E CATALOGO */
 function generaSettimanaAuto() {
     const container = document.getElementById('lista-piano-settimana');
     container.innerHTML = '';
     const giorni = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'];
     
+    // Legge le preferenze dai checkbox della schermata Piano (il quiz dei giorni Uni)
     const chks = document.querySelectorAll('.chk-uni:checked');
     const giorniUni = Array.from(chks).map(c => c.value);
 
@@ -264,7 +265,6 @@ function generaSettimanaAuto() {
     giorni.forEach((g, idx) => {
         const isUni = giorniUni.includes(g);
         
-        // Rotazione intelligente tra i diversi cibi del catalogo
         let colazioneScelta = cibiColazione.length > 0 ? cibiColazione[idx % cibiColazione.length].cibo : 'Colazione';
         let pranzoScelto = '';
         
@@ -286,13 +286,13 @@ function generaSettimanaAuto() {
 
         let cenaScelta = cibiCena.length > 0 ? cibiCena[idx % cibiCena.length].cibo : 'Cena';
         if (cibiCena.length > 1) {
-            cenaScelta = cibiCena[idx % cibiCena.length].cibo; // Alterna le cene se ce ne sono di più nel catalogo
+            cenaScelta = cibiCena[idx % cibiCena.length].cibo;
         }
 
         container.innerHTML += `
             <div class="meal-row">
                 <div>
-                    <strong>${g} ${isUni ? '🎓' : '🏠'}:</strong><br>
+                    <strong>${g} ${isUni ? '🎓 (Università)' : '🏠 (Casa)'}:</strong><br>
                     ☕ ${colazioneScelta}<br>
                     🍝 <strong>Pranzo:</strong> ${pranzoScelto}<br>
                     🐟 <strong>Cena:</strong> ${cenaScelta}
@@ -300,7 +300,7 @@ function generaSettimanaAuto() {
             </div>
         `;
     });
-    alert("Menù generato variando correttamente i piatti dal tuo catalogo!");
+    alert("Menù generato seguendo le tue preferenze e i giorni di Università!");
 }
 
 function stampaMenuFamiglia() { window.print(); }
