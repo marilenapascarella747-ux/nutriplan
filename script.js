@@ -1,5 +1,5 @@
 /* =========================================================
-   NUTRIPLAN ASL - SCRIPT DEFINITIVO CON SINCRONIZZAZIONE GIORNALIERA
+   NUTRIPLAN ASL - SCRIPT CON PRIORITA ASSOLUTA ALLE MODIFICHE
    ========================================================= */
 
 let dataSelezionata = new Date().toISOString().split('T')[0];
@@ -183,7 +183,7 @@ function salvaModificaPasto() {
 function salvaEDisegnaPasti() {
     salvaRegistroGiornaliero();
     renderPastiOggi();
-    renderDiarioASL(); // Aggiorna subito anche il diario ASL con la modifica fatta in "Oggi"
+    renderDiarioASL(); // Forza l'aggiornamento immediato della tabella ASL
 }
 
 function chiudiModale(id) {
@@ -233,7 +233,7 @@ function eliminaCiboCatalogo(index) {
     }
 }
 
-/* DIARIO ASL CHE PRENDE LA PRIORITÀ DALLE MODIFICHE FATTE IN "OGGI" */
+/* DIARIO ASL CON PRIORITÀ ASSOLUTA ALLE MODIFICHE FATTE IN "OGGI" */
 function renderDiarioASL() {
     const tbody = document.getElementById('asl-table-body');
     if(!tbody) return;
@@ -241,31 +241,41 @@ function renderDiarioASL() {
     const giorni = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'];
 
     giorni.forEach((g) => {
-        // Calcola la data esatta della settimana corrente per quel giorno
+        // Calcola la data esatta per ogni giorno della settimana corrente
         let d = new Date();
         let giornoCorrente = d.getDay() || 7; 
         let diff = giorni.indexOf(g) + 1 - giornoCorrente;
         d.setDate(d.getDate() + diff);
         let dataIso = d.toISOString().split('T')[0];
 
-        // 1. Controlla se c'è una modifica diretta fatta nella scheda "Oggi" per quella specifica data
-        let pastiGiorno = registroGiornaliero[dataIso]?.pasti;
+        // 1. REGOLA D'ORO: Se hai modificato il giorno nella scheda "Oggi", usiamo ESATTAMENTE QUELLO.
+        let pastiGiorno = null;
+        if (registroGiornaliero[dataIso] && registroGiornaliero[dataIso].pasti) {
+            pastiGiorno = registroGiornaliero[dataIso].pasti;
+        }
 
-        // 2. Se non ci sono modifiche in "Oggi", prende il menù settimanale generato
+        // 2. Altrimenti, se non ci sono modifiche in "Oggi", prendiamo il menù settimanale generato.
         if (!pastiGiorno) {
             pastiGiorno = window.menuAslSalvato[g] || {
                 'Colazione': '-', 'Spuntino M.': '-', 'Pranzo': '-', 'Merenda': '-', 'Cena': '-'
             };
         }
 
+        // Normalizza le chiavi per essere sicuri che stampi tutto correttamente
+        let colazione = pastiGiorno['Colazione'] || '-';
+        let spuntino = pastiGiorno['Spuntino M.'] || pastiGiorno['Spuntino'] || '-';
+        let pranzo = pastiGiorno['Pranzo'] || '-';
+        let merenda = pastiGiorno['Merenda'] || '-';
+        let cena = pastiGiorno['Cena'] || '-';
+
         tbody.innerHTML += `
             <tr>
                 <td><strong>${g}</strong></td>
-                <td>${pastiGiorno['Colazione'] || '-'}</td>
-                <td>${pastiGiorno['Spuntino M.'] || pastiGiorno['Spuntino'] || '-'}</td>
-                <td>${pastiGiorno['Pranzo'] || '-'}</td>
-                <td>${pastiGiorno['Merenda'] || '-'}</td>
-                <td>${pastiGiorno['Cena'] || '-'}</td>
+                <td>${colazione}</td>
+                <td>${spuntino}</td>
+                <td>${pranzo}</td>
+                <td>${merenda}</td>
+                <td>${cena}</td>
             </tr>
         `;
     });
@@ -424,7 +434,7 @@ function generaSettimanaAutoSilenzioso() {
 
 function generaSettimanaAuto() {
     generaSettimanaAutoSilenzioso();
-    alert("Menù generato con un click! I giorni in Università hanno il pranzo al sacco e tutto è sincronizzato.");
+    alert("Menù generato con un click!");
 }
 
 /* QUIZ MANUALE (CREA IL TUO MENÙ) */
